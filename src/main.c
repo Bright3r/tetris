@@ -1,7 +1,7 @@
 #include "main.h"
 
-static const int window_width = 600;
-static const int window_height = 600;
+static const int window_width = MAX_COLUMNS * TILE_SIZE;
+static const int window_height = MAX_ROWS * TILE_SIZE;
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
@@ -194,7 +194,7 @@ void drawTetromino(tetromino *piece) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
         drawAnonymousTile(board_col, board_row, getTetrominoColor(piece->type));
-        printf("Board Row: %d, Board Col: %d\n", board_row, board_col);
+        // printf("Board Row: %d, Board Col: %d\n", board_row, board_col);
       }
     }
   }
