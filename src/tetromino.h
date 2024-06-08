@@ -74,5 +74,8 @@ tetromino *createTetromino(tetromino_type piece_type, int row, int col);
 void destroyTetromino(tetromino *piece);
 tetromino_type getTetrominoType(int idx);
 SDL_Color *getTetrominoColor(tetromino_type piece_type);
+void rotateTetrominoLeft(tetromino *piece);
+void rotateTetrominoRight(tetromino *piece);
+
 
 

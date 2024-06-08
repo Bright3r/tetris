@@ -15,6 +15,7 @@ int main(void) {
   tetromino *pieces[NUM_TETROMINO_TYPES] = {0};
   for (int i = 0; i < NUM_TETROMINO_TYPES; i++) {
     pieces[i] = createTetromino(getTetrominoType(i), i * 2, i * 2);
+    rotateTetrominoLeft(pieces[i]);
   }
 
 
