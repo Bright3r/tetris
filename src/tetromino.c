@@ -90,10 +90,53 @@ void rotateTetrominoLeft(tetromino *piece) {
 }
 
 
-void updatePiece(tetromino *piece) {
-  static int MAX_COLUMNS = 20;
-
-  if (piece->col < MAX_COLUMNS) {
-    piece->col++;
+void updatePiece(tetromino *piece, uint32_t *last_update_time, float game_speed) {
+  // check whether enough time has passed since last update
+  uint32_t curr_time = SDL_GetTicks();
+  uint32_t elapsed_time = curr_time - *last_update_time;
+  if (elapsed_time < floor(game_speed)) {
+    return;
   }
+
+  if (piece->row < MAX_ROWS) {
+    piece->row++;
+    *last_update_time = curr_time;
+    printf("Row: %d, Col: %d\n", piece->row, piece->col);
+  }
+}
+
+void movePieceRight(tetromino *piece) {
+  int rightmost_col = 0;
+  for (int col = 0; col < TETROMINO_WIDTH; col++) {
+    for (int row = 0; row < TETROMINO_WIDTH; row++) {
+      if (piece->state[row][col]) {
+        rightmost_col = piece->col + col;
+        break;
+      }
+    }
+  }
+
+  if ((rightmost_col + 1) >= MAX_COLUMNS) {
+    return;
+  }
+
+  piece->col++;
+}
+
+void movePieceLeft(tetromino *piece) {
+  int leftmost_col = 0;
+  for (int col = TETROMINO_WIDTH - 1; col >= 0; col--) {
+    for (int row = 0; row < TETROMINO_WIDTH; row++) {
+      if (piece->state[row][col]) {
+        leftmost_col = piece->col + col;
+        break;
+      }
+    }
+  }
+
+  if ((leftmost_col - 1) < 0) {
+    return;
+  }
+
+  piece->col--;
 }

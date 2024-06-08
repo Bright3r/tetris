@@ -8,6 +8,8 @@
 
 #define NUM_TETROMINO_TYPES 7
 #define TETROMINO_WIDTH 4
+#define MAX_ROWS 20
+#define MAX_COLUMNS 10
 
 typedef bool tetromino_state[TETROMINO_WIDTH][TETROMINO_WIDTH];
 
@@ -76,7 +78,9 @@ tetromino_type getTetrominoType(int idx);
 SDL_Color *getTetrominoColor(tetromino_type piece_type);
 void rotateTetrominoLeft(tetromino *piece);
 void rotateTetrominoRight(tetromino *piece);
-void updatePiece(tetromino *piece);
+void updatePiece(tetromino *piece, uint32_t *last_update_time, float game_speed);
+void movePieceRight(tetromino *piece);
+void movePieceLeft(tetromino *piece);
 
 
 
