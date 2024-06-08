@@ -67,7 +67,7 @@ SDL_Color *getTetrominoColor(tetromino_type piece_type) {
   return NULL;
 }
 
-void rotateTetrominoLeft(tetromino *piece) {
+void rotateTetrominoRight(tetromino *piece) {
   tetromino_state new_state;
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
@@ -78,7 +78,7 @@ void rotateTetrominoLeft(tetromino *piece) {
   memcpy(piece->state, new_state, sizeof(tetromino_state));
 }
 
-void rotateTetrominoRight(tetromino *piece) {
+void rotateTetrominoLeft(tetromino *piece) {
   tetromino_state new_state;
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
@@ -90,3 +90,10 @@ void rotateTetrominoRight(tetromino *piece) {
 }
 
 
+void updatePiece(tetromino *piece) {
+  static int MAX_COLUMNS = 20;
+
+  if (piece->col < MAX_COLUMNS) {
+    piece->col++;
+  }
+}

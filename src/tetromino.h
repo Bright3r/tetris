@@ -76,6 +76,7 @@ tetromino_type getTetrominoType(int idx);
 SDL_Color *getTetrominoColor(tetromino_type piece_type);
 void rotateTetrominoLeft(tetromino *piece);
 void rotateTetrominoRight(tetromino *piece);
+void updatePiece(tetromino *piece);
 
 
 

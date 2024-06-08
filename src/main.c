@@ -18,6 +18,7 @@ int main(void) {
     rotateTetrominoLeft(pieces[i]);
   }
 
+  int selected = 6;
 
   // Gameloop
   bool isGameRunning = true;
@@ -35,6 +36,12 @@ int main(void) {
           case SDLK_RETURN:
             isGameRunning = false;
             break;
+          case SDLK_w:
+            rotateTetrominoRight(pieces[selected]);
+            break;
+          case SDLK_s:
+            rotateTetrominoLeft(pieces[selected]);
+            break;
         }
       }
     }
@@ -42,6 +49,7 @@ int main(void) {
     refreshScreen();
     for (int i = 0; i < NUM_TETROMINO_TYPES; i++) {
       drawTetromino(pieces[i]);
+      updatePiece(pieces[i]);
     }
     // drawAnonymousTile(4, 4, &COLOR_WHITE);
     // drawAnonymousTile(4, 5, &COLOR_DARK_BLUE);
@@ -184,3 +192,5 @@ void drawTetromino(tetromino *piece) {
     }
   }
 }
+
+
