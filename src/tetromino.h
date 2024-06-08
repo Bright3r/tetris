@@ -85,11 +85,11 @@ bool checkBorderCollisions(tetromino *piece);
 bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap);
 bool checkCollisionWithTile(tetromino *piece, tile_t *tile);
 bool isOnFloor(tetromino *piece);
-void movePieceRight(tetromino *piece);
-void movePieceLeft(tetromino *piece);
-void rotateTetrominoRight(tetromino *piece);
-void rotateTetrominoLeft(tetromino *piece);
-void tryToChangeState(tetromino *piece, tetromino_state *new_state);
+void movePieceRight(tetromino *piece, tilemap_t *tilemap);
+void movePieceLeft(tetromino *piece, tilemap_t *tilemap);
+void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap);
+void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap);
+void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state);
 
 
 

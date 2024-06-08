@@ -33,16 +33,16 @@ int main(void) {
             isGameRunning = false;
             break;
           case SDLK_w:
-            rotateTetrominoRight(piece);
+            rotateTetrominoRight(piece, tilemap);
             break;
           case SDLK_s:
-            rotateTetrominoLeft(piece);
+            rotateTetrominoLeft(piece, tilemap);
             break;
           case SDLK_d:
-            movePieceRight(piece);
+            movePieceRight(piece, tilemap);
             break;
           case SDLK_a:
-            movePieceLeft(piece);
+            movePieceLeft(piece, tilemap);
             break;
         }
       }

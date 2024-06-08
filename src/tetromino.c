@@ -158,35 +158,30 @@ bool isOnFloor(tetromino *piece) {
   return bottom_row >= MAX_ROWS;
 }
 
-void movePieceRight(tetromino *piece) {
-  int rightmost_col = getRightmostCol(piece);
-  if ((rightmost_col + 1) >= MAX_COLUMNS) {
-    return;
-  }
-
+void movePieceRight(tetromino *piece, tilemap_t *tilemap) {
+  // make move
   piece->col++;
+
+  // check if move results in collision
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+    // undo move
+    piece->col--;
+  }
 }
 
-void movePieceLeft(tetromino *piece) {
-  int leftmost_col = 0;
-  for (int col = TETROMINO_WIDTH - 1; col >= 0; col--) {
-    for (int row = 0; row < TETROMINO_WIDTH; row++) {
-      if (piece->state[row][col]) {
-        leftmost_col = piece->col + col;
-        break;
-      }
-    }
-  }
-
-  if ((leftmost_col - 1) < 0) {
-    return;
-  }
-
+void movePieceLeft(tetromino *piece, tilemap_t *tilemap) {
+  // make move
   piece->col--;
+
+  // check if move results in collision
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+    // undo move
+    piece->col++;
+  }
 }
 
 
-void tryToChangeState(tetromino *piece, tetromino_state *new_state) {
+void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state) {
   // save current state of piece
   tetromino_state temp_state;
   memcpy(temp_state, piece->state, sizeof(tetromino_state));
@@ -195,13 +190,13 @@ void tryToChangeState(tetromino *piece, tetromino_state *new_state) {
   memcpy(piece->state, *new_state, sizeof(tetromino_state));
 
   // check if move results in a collision
-  if (checkBorderCollisions(piece)) {
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
     // undo rotation
     memcpy(piece->state, temp_state, sizeof(tetromino_state));
   }
 }
 
-void rotateTetrominoRight(tetromino *piece) {
+void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap) {
   // get state after rotating current state right
   tetromino_state new_state;
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
@@ -210,10 +205,10 @@ void rotateTetrominoRight(tetromino *piece) {
     }
   } 
 
-  tryToChangeState(piece, &new_state);
+  tryToChangeState(piece, tilemap, &new_state);
 }
 
-void rotateTetrominoLeft(tetromino *piece) {
+void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap) {
   // get state after rotating current state left
   tetromino_state new_state;
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
@@ -222,7 +217,7 @@ void rotateTetrominoLeft(tetromino *piece) {
     }
   } 
 
-  tryToChangeState(piece, &new_state);
+  tryToChangeState(piece, tilemap, &new_state);
 }
 
 
