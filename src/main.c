@@ -8,29 +8,32 @@ static SDL_Renderer *renderer;
 static TTF_Font *font;
 static Mix_Music *music;
 
-
 int main(void) {
   init(); // Initialize SDL2
   
   tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
   tetromino *piece = createRandomTetromino();
 
+  static bool is_moving_left = false;
+  static bool is_moving_right = false;
+
   // Gameloop
-  bool isGameRunning = true;
-  SDL_Event event;
+  bool is_game_running = true;
   uint32_t last_update_time = SDL_GetTicks();
-  while (isGameRunning) {
-    uint32_t startTime = SDL_GetTicks();
+  uint32_t last_input_time = SDL_GetTicks();
+  SDL_Event event;
+  while (is_game_running) {
+    uint32_t start_time = SDL_GetTicks();
 
     // event handling
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
-        isGameRunning = false;
+        is_game_running = false;
       }
       else if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
           case SDLK_RETURN:
-            isGameRunning = false;
+            is_game_running = false;
             break;
           case SDLK_w:
             rotateTetrominoRight(piece, tilemap);
@@ -39,13 +42,31 @@ int main(void) {
             rotateTetrominoLeft(piece, tilemap);
             break;
           case SDLK_d:
-            movePieceRight(piece, tilemap);
+            is_moving_right = true;
             break;
           case SDLK_a:
-            movePieceLeft(piece, tilemap);
+            is_moving_left = true;
             break;
         }
       }
+      else if (event.type == SDL_KEYUP) {
+        switch (event.key.keysym.sym) {
+          case SDLK_d:
+            is_moving_right = false;
+            break;
+          case SDLK_a:
+            is_moving_left = false;
+            break;
+        }
+      }
+    }
+
+    // execute player inputs
+    if (is_moving_right) {
+      movePieceRight(piece, tilemap, &last_input_time);
+    }
+    if (is_moving_left) {
+      movePieceLeft(piece, tilemap, &last_input_time);
     }
 
 
@@ -55,29 +76,14 @@ int main(void) {
     drawTetromino(piece);
     drawTileMap(tilemap);
 
-    // drawAnonymousTile(1, 1, &COLOR_WHITE);
-    // drawAnonymousTile(1, 2, &COLOR_WHITE);
-    // drawAnonymousTile(1, 3, &COLOR_WHITE);
-    // drawAnonymousTile(1, 4, &COLOR_WHITE);
-    //
-    // drawAnonymousTile(5, 4, &COLOR_WHITE);
-    // drawAnonymousTile(6, 4, &COLOR_WHITE);
-    // drawAnonymousTile(7, 4, &COLOR_WHITE);
-    // drawAnonymousTile(8, 4, &COLOR_WHITE);
-
-
-    // game logic
-    updatePiece(tilemap, &piece, &last_update_time, 100.0f);
-
-    
-
-
     SDL_RenderPresent(renderer);
 
+    // game logic
+    updatePiece(tilemap, &piece, &last_update_time, TICK_RATE);
+
+
     // Cap Framerate
-    uint32_t currTime = SDL_GetTicks();
-    float elapsedTime = currTime - startTime;
-    SDL_Delay(floor(FRAME_INTERVAL - elapsedTime));
+    SDL_Delay(floor(FRAME_INTERVAL - getElapsedTime(start_time)));
   }
 
   
@@ -85,9 +91,8 @@ int main(void) {
   destroyTetromino(piece);
   destroyTileMap(tilemap);
 
-
-  printf("Sucess!\n");
   cleanup_SDL();
+  printf("Sucess!\n");
   return 0;
 }
 
@@ -164,6 +169,11 @@ void setRenderColor(SDL_Color *color) {
   SDL_SetRenderDrawColor(renderer, color->r, color->g, color->b, color->a);
 }
 
+float getElapsedTime(uint32_t last_time) {
+  return SDL_GetTicks() - last_time;
+}
+
+
 
 
 
@@ -201,12 +211,53 @@ void drawTileMap(tilemap_t *tilemap) {
 
 void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed) {
   // check whether enough time has passed since last update
-  uint32_t curr_time = SDL_GetTicks();
-  uint32_t elapsed_time = curr_time - *last_update_time;
-  if (elapsed_time < floor(game_speed)) {
+  if (getElapsedTime(*last_update_time) < floor(game_speed)) {
     return;
   }
 
+  // apply gravity to piece
+  movePieceDown(piece, tilemap);
+
+  *last_update_time = SDL_GetTicks();
+}
+
+void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time) {
+  // make sure we do not handle inputs too frequently
+  if (getElapsedTime(*last_input_time) < INPUT_REFRESH_RATE) {
+    return;
+  }
+
+  // make move
+  piece->col++;
+
+  // check if move results in collision
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+    // undo move
+    piece->col--;
+  }
+
+  *last_input_time = SDL_GetTicks();
+}
+
+void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time) {
+  // make sure we do not handle inputs too frequently
+  if (getElapsedTime(*last_input_time) < INPUT_REFRESH_RATE) {
+    return;
+  }
+
+  // make move
+  piece->col--;
+
+  // check if move results in collision
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+    // undo move
+    piece->col++;
+  }
+
+  *last_input_time = SDL_GetTicks();
+}
+
+void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
   // move piece and check whether the move results in a collision
   (*piece)->row++;
   if (isOnFloor(*piece) || checkTileCollisions(*piece, tilemap)) {
@@ -220,8 +271,6 @@ void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_ti
     destroyTetromino(*piece);
     *piece = createRandomTetromino();
   }
-
-  *last_update_time = curr_time;
 }
 
 void tileify(tilemap_t *tilemap, tetromino *piece) {

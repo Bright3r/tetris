@@ -158,27 +158,6 @@ bool isOnFloor(tetromino *piece) {
   return bottom_row >= MAX_ROWS;
 }
 
-void movePieceRight(tetromino *piece, tilemap_t *tilemap) {
-  // make move
-  piece->col++;
-
-  // check if move results in collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
-    // undo move
-    piece->col--;
-  }
-}
-
-void movePieceLeft(tetromino *piece, tilemap_t *tilemap) {
-  // make move
-  piece->col--;
-
-  // check if move results in collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
-    // undo move
-    piece->col++;
-  }
-}
 
 
 void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state) {
@@ -219,6 +198,4 @@ void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap) {
 
   tryToChangeState(piece, tilemap, &new_state);
 }
-
-
 

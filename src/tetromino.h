@@ -39,7 +39,7 @@ static tetromino_state J_PIECE_INITIAL_STATE = {
 
 static tetromino_state L_PIECE_INITIAL_STATE = {
   { 0, 0, 0, 0 },
-  { 0, 0, 0, 1 },
+  { 0, 0, 0, 0 },
   { 0, 0, 0, 1 },
   { 0, 1, 1, 1 }
 };
@@ -80,13 +80,10 @@ SDL_Color *getTetrominoColor(tetromino_type piece_type);
 int getBottomRow(tetromino *piece);
 int getRightmostCol(tetromino *piece);
 int getLeftmostCol(tetromino *piece);
+bool isOnFloor(tetromino *piece);
 bool checkBorderCollisions(tetromino *piece);
-
 bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap);
 bool checkCollisionWithTile(tetromino *piece, tile_t *tile);
-bool isOnFloor(tetromino *piece);
-void movePieceRight(tetromino *piece, tilemap_t *tilemap);
-void movePieceLeft(tetromino *piece, tilemap_t *tilemap);
 void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap);
 void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap);
 void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state);

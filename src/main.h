@@ -12,8 +12,11 @@
 #include "tetromino.c"
 
 #define TITLE "Title"
-#define FRAME_INTERVAL 16.667f
 #define TILE_SIZE 25
+#define FRAME_INTERVAL 16.667f
+#define TICK_RATE 100.0f
+#define INPUT_REFRESH_RATE 50.0f
+
 
 void init();
 void cleanup_SDL();
@@ -24,8 +27,12 @@ void drawAnonymousTile(int col, int row, SDL_Color *color);
 tilemap_t *createTileMap();
 void drawTetromino(tetromino *piece);
 void drawTileMap(tilemap_t *tilemap);
-void tileify(tilemap_t *tilemap, tetromino *piece);
 void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed);
+void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
+void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
+void movePieceDown(tetromino **piece, tilemap_t *tilemap);
+void tileify(tilemap_t *tilemap, tetromino *piece);
+float getElapsedTime(uint32_t last_time);
 
 
 
