@@ -1,7 +1,7 @@
 
 #include "tetromino.h"
 
-tetromino *createTetromino(tetromino_type piece_type, int row, int col) {
+tetromino *createTetromino(tetromino_type piece_type, int col, int row) {
   tetromino *piece = (tetromino *) malloc(sizeof(tetromino));
   piece->type = piece_type;
   piece->row = row;
@@ -44,6 +44,12 @@ tetromino_type getTetrominoType(int idx) {
   };
 
   return tetromino_types[idx];
+}
+
+tetromino *createRandomTetromino() {
+  int random_piece_number = rand() % NUM_TETROMINO_TYPES;
+  tetromino *piece = createTetromino(getTetrominoType(random_piece_number), 0, 0);
+  return piece;
 }
 
 SDL_Color *getTetrominoColor(tetromino_type piece_type) {
@@ -172,7 +178,6 @@ void updatePiece(tetromino *piece, uint32_t *last_update_time, float game_speed)
   }
 
   *last_update_time = curr_time;
-  // printf("Row: %d, Col: %d\n", piece->row, piece->col);
 }
 
 void movePieceRight(tetromino *piece) {
@@ -200,4 +205,9 @@ void movePieceLeft(tetromino *piece) {
   }
 
   piece->col--;
+}
+
+bool isOnFloor(tetromino *piece) {
+  int bottom_row = getBottomRow(piece);
+  return bottom_row >= (MAX_ROWS - 1);
 }

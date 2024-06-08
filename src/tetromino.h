@@ -72,9 +72,10 @@ static tetromino_state Z_PIECE_INITIAL_STATE = {
   { 0, 1, 0, 0 }
 };
 
-tetromino *createTetromino(tetromino_type piece_type, int row, int col);
+tetromino *createTetromino(tetromino_type piece_type, int col, int row);
 void destroyTetromino(tetromino *piece);
 tetromino_type getTetrominoType(int idx);
+tetromino *createRandomTetromino();
 SDL_Color *getTetrominoColor(tetromino_type piece_type);
 int getBottomRow(tetromino *piece);
 int getRightmostCol(tetromino *piece);
@@ -84,6 +85,7 @@ void rotateTetrominoRight(tetromino *piece);
 void updatePiece(tetromino *piece, uint32_t *last_update_time, float game_speed);
 void movePieceRight(tetromino *piece);
 void movePieceLeft(tetromino *piece);
+bool isOnFloor(tetromino *piece);
 
 
 
