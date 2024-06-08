@@ -80,12 +80,16 @@ SDL_Color *getTetrominoColor(tetromino_type piece_type);
 int getBottomRow(tetromino *piece);
 int getRightmostCol(tetromino *piece);
 int getLeftmostCol(tetromino *piece);
-void rotateTetrominoLeft(tetromino *piece);
-void rotateTetrominoRight(tetromino *piece);
-void updatePiece(tetromino *piece, uint32_t *last_update_time, float game_speed);
+bool checkBorderCollisions(tetromino *piece);
+
+bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap);
+bool checkCollisionWithTile(tetromino *piece, tile_t *tile);
+bool isOnFloor(tetromino *piece);
 void movePieceRight(tetromino *piece);
 void movePieceLeft(tetromino *piece);
-bool isOnFloor(tetromino *piece);
+void rotateTetrominoRight(tetromino *piece);
+void rotateTetrominoLeft(tetromino *piece);
+void tryToChangeState(tetromino *piece, tetromino_state *new_state);
 
 
 

@@ -12,7 +12,7 @@ static Mix_Music *music;
 int main(void) {
   init(); // Initialize SDL2
   
-  tilemap_t *tilemap = createTileMap();
+  tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
   tetromino *piece = createRandomTetromino();
 
   // Gameloop
@@ -67,14 +67,8 @@ int main(void) {
 
 
     // game logic
-    updatePiece(piece, &last_update_time, 100.0f);
-    if (isOnFloor(piece)) {
-      tileify(tilemap, piece);
-      destroyTetromino(piece);
-      piece = createRandomTetromino();
-    }
+    updatePiece(tilemap, &piece, &last_update_time, 100.0f);
 
-    // check if piece collides with any tiles
     
 
 
@@ -175,23 +169,6 @@ void setRenderColor(SDL_Color *color) {
 
 
 
-tile_t *createTile(int col, int row, SDL_Color *color) {  
-  SDL_Rect *rect = (SDL_Rect *) malloc(sizeof(SDL_Rect));
-  rect->y = row * TILE_SIZE;
-  rect->x = col * TILE_SIZE;
-  rect->w = TILE_SIZE;
-  rect->h = TILE_SIZE;
-
-  tile_t *new_tile = (tile_t *) malloc(sizeof(tile_t));
-  new_tile->rect = rect;
-  new_tile->color = color;
-  return new_tile;
-}
-
-void destroyTile(tile_t *tile) {
-  free(tile->rect);
-  free(tile);
-}
 
 void drawTile(tile_t *tile) {
   setRenderColor(tile->color);
@@ -199,7 +176,7 @@ void drawTile(tile_t *tile) {
 }
 
 void drawAnonymousTile(int col, int row, SDL_Color *color) {
-  tile_t *tile = createTile(col, row, color);
+  tile_t *tile = createTile(col, row, color, TILE_SIZE);
   drawTile(tile);
   destroyTile(tile);
 }
@@ -216,31 +193,35 @@ void drawTetromino(tetromino *piece) {
   }
 }
 
-tilemap_t *createTileMap() {
-  tilemap_t *tilemap = (tilemap_t *) malloc(sizeof(tilemap));
-  tilemap->map = (tile_t **) calloc(MAX_ROWS * MAX_COLUMNS, sizeof(tile_t *));
-  tilemap->num_tiles = 0;
-
-  return tilemap;
-}
-
-void destroyTileMap(tilemap_t *tilemap) {
-  for (int i = 0; i < tilemap->num_tiles; i++) {
-    destroyTile(tilemap->map[i]);
-  }
-
-  free(tilemap->map);
-  free(tilemap);
-}
-
-void addTile(tilemap_t *tilemap, tile_t *tile) {
-  tilemap->map[tilemap->num_tiles++] = tile;
-}
-
 void drawTileMap(tilemap_t *tilemap) {
   for (int i = 0; i < tilemap->num_tiles; i++) {
     drawTile(tilemap->map[i]);
   }
+}
+
+void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed) {
+  // check whether enough time has passed since last update
+  uint32_t curr_time = SDL_GetTicks();
+  uint32_t elapsed_time = curr_time - *last_update_time;
+  if (elapsed_time < floor(game_speed)) {
+    return;
+  }
+
+  // move piece and check whether the move results in a collision
+  (*piece)->row++;
+  if (isOnFloor(*piece) || checkTileCollisions(*piece, tilemap)) {
+    // undo move
+    (*piece)->row--;
+
+    // place piece down
+    tileify(tilemap, *piece);
+
+    // replace current piece with a new tetromino
+    destroyTetromino(*piece);
+    *piece = createRandomTetromino();
+  }
+
+  *last_update_time = curr_time;
 }
 
 void tileify(tilemap_t *tilemap, tetromino *piece) {
@@ -250,14 +231,8 @@ void tileify(tilemap_t *tilemap, tetromino *piece) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
         SDL_Color *color = getTetrominoColor(piece->type);
-        addTile(tilemap, createTile(board_col, board_row, color));
+        addTile(tilemap, createTile(board_col, board_row, color, TILE_SIZE));
       }
     }
   }
 }
-
-
-
-
-
-
