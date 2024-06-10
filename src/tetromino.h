@@ -11,7 +11,7 @@
 #define MAX_ROWS 20
 #define MAX_COLUMNS 10
 
-typedef bool tetromino_state[TETROMINO_WIDTH][TETROMINO_WIDTH];
+typedef const bool tetromino_state[TETROMINO_WIDTH][TETROMINO_WIDTH];
 
 typedef enum tetromino_type {
   i_piece, j_piece, l_piece, o_piece, s_piece, t_piece, z_piece
@@ -19,62 +19,207 @@ typedef enum tetromino_type {
 
 typedef struct tetromino {
   tetromino_type type;
-  tetromino_state state;
+  int state_idx;
   int row, col;
 } tetromino;
 
-static tetromino_state I_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 1 },
-  { 0, 0, 0, 1 },
-  { 0, 0, 0, 1 },
-  { 0, 0, 0, 1 }
+static const tetromino_state I_PIECE_STATES[4] = {
+  {
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 1, 1, 1, 1 },
+    { 0, 0, 0, 0 }
+  },
+  {
+    { 0, 1, 0, 0 },
+    { 0, 1, 0, 0 },
+    { 0, 1, 0, 0 },
+    { 0, 1, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 1, 1, 1, 1 },
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 }
+  },
 };
 
-static tetromino_state J_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 1, 0, 0, 0 },
-  { 1, 1, 1, 0 }
+static const tetromino_state J_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 1 },
+    { 0, 0, 0, 1 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 1 },
+    { 0, 0, 0, 1 },
+    { 0, 0, 1, 1 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 0, 0 },
+    { 0, 1, 1, 1 },
+    { 0, 0, 0, 0 }
+  },
 };
 
-static tetromino_state L_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 1 },
-  { 0, 1, 1, 1 }
+static const tetromino_state L_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 1 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 1 },
+    { 0, 1, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 1 },
+    { 0, 1, 1, 1 },
+    { 0, 0, 0, 0 }
+  },
 };
 
-static tetromino_state O_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 1, 1, 0 },
-  { 0, 1, 1, 0 }
+static const tetromino_state O_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 0, 0 }
+  },
 };
 
-static tetromino_state S_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 1, 1, 0 },
-  { 1, 1, 0, 0 }
+static const tetromino_state S_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 0, 1 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 1, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 0, 0 }
+  },
 };
 
-static tetromino_state T_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 0, 0 },
-  { 0, 0, 1, 0 },
-  { 0, 1, 1, 1 }
+static const tetromino_state T_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 1, 1, 1 },
+    { 0, 0, 0, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 1 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 1, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 1, 0 }
+  },
 };
 
-static tetromino_state Z_PIECE_INITIAL_STATE = {
-  { 0, 0, 0, 0 },
-  { 0, 0, 1, 0 },
-  { 0, 1, 1, 0 },
-  { 0, 1, 0, 0 }
+static const tetromino_state Z_PIECE_STATES[4] = {
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 1 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 1, 1 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 0, 0, 1 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 1, 0 }
+  },
+  {
+    { 0, 0, 0, 0 },
+    { 0, 1, 1, 0 },
+    { 0, 0, 1, 1 },
+    { 0, 0, 0, 0 }
+  },
 };
+
+
+
+
 
 tetromino *createTetromino(tetromino_type piece_type, int col, int row);
 void destroyTetromino(tetromino *piece);
 tetromino_type getTetrominoType(int idx);
+tetromino_state *getTetrominoState(tetromino *piece);
 tetromino *createRandomTetromino();
 SDL_Color *getTetrominoColor(tetromino_type piece_type);
 int getBottomRow(tetromino *piece);
@@ -86,7 +231,6 @@ bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap);
 bool checkCollisionWithTile(tetromino *piece, tile_t *tile);
 void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap);
 void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap);
-void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state);
 
 
 

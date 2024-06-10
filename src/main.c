@@ -194,7 +194,8 @@ void drawAnonymousTile(int col, int row, SDL_Color *color) {
 void drawTetromino(tetromino *piece) {
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
         drawAnonymousTile(board_col, board_row, getTetrominoColor(piece->type));
@@ -276,7 +277,8 @@ void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
 void tileify(tilemap_t *tilemap, tetromino *piece) {
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
         SDL_Color *color = getTetrominoColor(piece->type);

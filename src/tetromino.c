@@ -4,32 +4,9 @@
 tetromino *createTetromino(tetromino_type piece_type, int col, int row) {
   tetromino *piece = (tetromino *) malloc(sizeof(tetromino));
   piece->type = piece_type;
+  piece->state_idx = 0;
   piece->row = row;
   piece->col = col;
-
-  switch (piece_type) {
-    case i_piece:
-      memcpy(piece->state, I_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case j_piece:
-      memcpy(piece->state, J_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case l_piece:
-      memcpy(piece->state, L_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case o_piece:
-      memcpy(piece->state, O_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case s_piece:
-      memcpy(piece->state, S_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case t_piece: 
-      memcpy(piece->state, T_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-    case z_piece:
-      memcpy(piece->state, Z_PIECE_INITIAL_STATE, sizeof(tetromino_state));
-      break;
-  }
 
   return piece;
 }
@@ -44,6 +21,27 @@ tetromino_type getTetrominoType(int idx) {
   };
 
   return tetromino_types[idx];
+}
+
+tetromino_state *getTetrominoState(tetromino *piece) {
+  switch (piece->type) {
+    case i_piece:
+      return &I_PIECE_STATES[piece->state_idx];
+    case j_piece:
+      return &J_PIECE_STATES[piece->state_idx];
+    case l_piece:
+      return &L_PIECE_STATES[piece->state_idx];
+    case o_piece:
+      return &O_PIECE_STATES[piece->state_idx];
+    case s_piece:
+      return &S_PIECE_STATES[piece->state_idx];
+    case t_piece: 
+      return &T_PIECE_STATES[piece->state_idx];
+    case z_piece:
+      return &Z_PIECE_STATES[piece->state_idx];
+  };
+
+  return NULL;
 }
 
 tetromino *createRandomTetromino() {
@@ -78,7 +76,8 @@ SDL_Color *getTetrominoColor(tetromino_type piece_type) {
 int getBottomRow(tetromino *piece) {
   for (int row = TETROMINO_WIDTH - 1; row >= 0; row--) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         return piece->row + row;
       }
     }
@@ -90,7 +89,8 @@ int getBottomRow(tetromino *piece) {
 int getRightmostCol(tetromino *piece) {
   for (int col = TETROMINO_WIDTH - 1; col >= 0; col--) {
     for (int row = 0; row < TETROMINO_WIDTH; row++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         return piece->col + col;
       }
     }
@@ -102,7 +102,8 @@ int getRightmostCol(tetromino *piece) {
 int getLeftmostCol(tetromino *piece) {
   for (int col = 0; col < TETROMINO_WIDTH; col++) {
     for (int row = 0; row < TETROMINO_WIDTH; row++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         return piece->col + col;
       }
     }
@@ -139,7 +140,8 @@ bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap) {
 bool checkCollisionWithTile(tetromino *piece, tile_t *tile) {
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      if (piece->state[row][col]) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
         // check if piece segment and tile are on same (col, row)
         int board_row = piece->row + row;
         int board_col = piece->col + col;
@@ -158,44 +160,31 @@ bool isOnFloor(tetromino *piece) {
   return bottom_row >= MAX_ROWS;
 }
 
+void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap) {
+  int temp_state_idx = piece->state_idx;
 
+  // Change piece to next state
+  int new_state_idx = (piece->state_idx + 1) % 4;
+  piece->state_idx = new_state_idx;
 
-void tryToChangeState(tetromino *piece, tilemap_t *tilemap, tetromino_state *new_state) {
-  // save current state of piece
-  tetromino_state temp_state;
-  memcpy(temp_state, piece->state, sizeof(tetromino_state));
-
-  // apply move to piece
-  memcpy(piece->state, *new_state, sizeof(tetromino_state));
-
-  // check if move results in a collision
+  // Check if new state results in a collision
   if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
-    // undo rotation
-    memcpy(piece->state, temp_state, sizeof(tetromino_state));
+    // Undo state change
+    piece->state_idx = temp_state_idx;
   }
 }
 
-void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap) {
-  // get state after rotating current state right
-  tetromino_state new_state;
-  for (int row = 0; row < TETROMINO_WIDTH; row++) {
-    for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      new_state[TETROMINO_WIDTH - 1 - col][row] = piece->state[row][col];
-    }
-  } 
-
-  tryToChangeState(piece, tilemap, &new_state);
-}
-
 void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap) {
-  // get state after rotating current state left
-  tetromino_state new_state;
-  for (int row = 0; row < TETROMINO_WIDTH; row++) {
-    for (int col = 0; col < TETROMINO_WIDTH; col++) {
-      new_state[col][TETROMINO_WIDTH - 1 - row] = piece->state[row][col];
-    }
-  } 
+  int temp_state_idx = piece->state_idx;
 
-  tryToChangeState(piece, tilemap, &new_state);
+  // Change piece to next state
+  int new_state_idx = (piece->state_idx - 1) % 4;
+  piece->state_idx = new_state_idx;
+
+  // Check if new state results in a collision
+  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+    // Undo state change
+    piece->state_idx = temp_state_idx;
+  }
 }
 
