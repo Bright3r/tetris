@@ -259,11 +259,19 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
 }
 
 void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
+  static bool has_been_on_ground = false;
+
   // move piece and check whether the move results in a collision
   (*piece)->row++;
   if (isOnFloor(*piece) || checkTileCollisions(*piece, tilemap)) {
     // undo move
     (*piece)->row--;
+
+    // give the player an extra i-frame when first hitting the ground
+    if (!has_been_on_ground) {
+      has_been_on_ground = true;
+      return;
+    }
 
     // place piece down
     tileify(tilemap, *piece);
@@ -271,6 +279,9 @@ void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
     // replace current piece with a new tetromino
     destroyTetromino(*piece);
     *piece = createRandomTetromino();
+
+    // reset i-frame status
+    has_been_on_ground = false;
   }
 }
 

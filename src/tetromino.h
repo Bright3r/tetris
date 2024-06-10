@@ -8,6 +8,7 @@
 
 #define NUM_TETROMINO_TYPES 7
 #define TETROMINO_WIDTH 4
+#define NUM_TETROMINO_PERMUTATIONS 4
 #define MAX_ROWS 20
 #define MAX_COLUMNS 10
 
@@ -23,7 +24,7 @@ typedef struct tetromino {
   int row, col;
 } tetromino;
 
-static const tetromino_state I_PIECE_STATES[4] = {
+static const tetromino_state I_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 1, 0 },
     { 0, 0, 1, 0 },
@@ -50,7 +51,7 @@ static const tetromino_state I_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state J_PIECE_STATES[4] = {
+static const tetromino_state J_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 0, 1, 1 },
@@ -77,7 +78,7 @@ static const tetromino_state J_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state L_PIECE_STATES[4] = {
+static const tetromino_state L_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 0, 1, 0 },
@@ -104,7 +105,7 @@ static const tetromino_state L_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state O_PIECE_STATES[4] = {
+static const tetromino_state O_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 1, 1, 0 },
@@ -131,7 +132,7 @@ static const tetromino_state O_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state S_PIECE_STATES[4] = {
+static const tetromino_state S_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 0, 1, 0 },
@@ -158,7 +159,7 @@ static const tetromino_state S_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state T_PIECE_STATES[4] = {
+static const tetromino_state T_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 0, 1, 0 },
@@ -185,7 +186,7 @@ static const tetromino_state T_PIECE_STATES[4] = {
   },
 };
 
-static const tetromino_state Z_PIECE_STATES[4] = {
+static const tetromino_state Z_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
   {
     { 0, 0, 0, 0 },
     { 0, 0, 0, 1 },
@@ -211,8 +212,6 @@ static const tetromino_state Z_PIECE_STATES[4] = {
     { 0, 0, 0, 0 }
   },
 };
-
-
 
 
 
