@@ -14,9 +14,6 @@ int main(void) {
   tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
   tetromino *piece = createRandomTetromino();
 
-  static bool is_moving_left = false;
-  static bool is_moving_right = false;
-
   // Gameloop
   bool is_game_running = true;
   uint32_t last_update_time = SDL_GetTicks();
@@ -42,33 +39,17 @@ int main(void) {
             rotateTetrominoLeft(tilemap, piece);
             break;
           case SDLK_d:
-            is_moving_right = true;
+            movePieceRight(piece, tilemap, &last_input_time);
             break;
           case SDLK_a:
-            is_moving_left = true;
+            movePieceLeft(piece, tilemap, &last_input_time);
             break;
-        }
-      }
-      else if (event.type == SDL_KEYUP) {
-        switch (event.key.keysym.sym) {
-          case SDLK_d:
-            is_moving_right = false;
-            break;
-          case SDLK_a:
-            is_moving_left = false;
+          case SDLK_SPACE:
+            dropPiece(&piece, tilemap);
             break;
         }
       }
     }
-
-    // execute player inputs
-    if (is_moving_right) {
-      movePieceRight(piece, tilemap, &last_input_time);
-    }
-    if (is_moving_left) {
-      movePieceLeft(piece, tilemap, &last_input_time);
-    }
-
 
     // update screen
     refreshScreen();
@@ -265,12 +246,13 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
 
 void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
   static bool has_been_on_ground = false;
+  tetromino *piece = *piece_ptr;
 
   // move piece and check whether the move results in a collision
-  (*piece_ptr)->row++;
-  if (isOnFloor(*piece_ptr) || checkTileCollisions(tilemap, *piece_ptr)) {
+  piece->row++;
+  if (isOnFloor(piece) || checkTileCollisions(tilemap, piece)) {
     // undo move
-    (*piece_ptr)->row--;
+    piece->row--;
 
     // give the player an extra i-frame when first hitting the ground
     if (!has_been_on_ground) {
@@ -279,18 +261,40 @@ void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
     }
 
     // place piece down
-    tileify(tilemap, *piece_ptr);
+    tileify(tilemap, piece);
 
     // remove any rows that were filled
     handleFilledRows(tilemap);
 
     // replace current piece with a new tetromino
-    destroyTetromino(*piece_ptr);
+    destroyTetromino(piece);
     *piece_ptr = createRandomTetromino();
 
     // reset i-frame status
     has_been_on_ground = false;
   }
+}
+
+void dropPiece(tetromino **piece_ptr, tilemap_t *tilemap) {
+  tetromino *piece = *piece_ptr;
+
+  // move piece down until a collision occurs
+  while (!(isOnFloor(piece) || checkTileCollisions(tilemap, piece))) {
+    piece->row++;
+  }
+
+  // undo collision
+  piece->row--;
+
+  // place piece
+  tileify(tilemap, piece);
+
+  // remove any rows that were filled
+  handleFilledRows(tilemap);
+
+  // replace current piece with a new tetromino
+  destroyTetromino(piece);
+  *piece_ptr = createRandomTetromino();
 }
 
 void tileify(tilemap_t *tilemap, tetromino *piece) {

@@ -32,6 +32,7 @@ void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_ti
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap);
+void dropPiece(tetromino **piece_ptr, tilemap_t *tilemap);
 void tileify(tilemap_t *tilemap, tetromino *piece);
 void handleFilledRows(tilemap_t *tilemap);
 void shiftRowsDown(tilemap_t *tilemap, int starting_row);
