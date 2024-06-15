@@ -180,7 +180,7 @@ void rotateTetrominoLeft(tilemap_t *tilemap, tetromino *piece) {
   int temp_state_idx = piece->state_idx;
 
   // Change piece to next state
-  int new_state_idx = (piece->state_idx - 1) % 4;
+  int new_state_idx = (piece->state_idx + 3) % 4;
   piece->state_idx = new_state_idx;
 
   // Check if new state results in a collision

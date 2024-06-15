@@ -11,66 +11,14 @@ static Mix_Music *music;
 int main(void) {
   init(); // Initialize SDL2
   
-  tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
-  tetromino *piece = createRandomTetromino();
+  // Run game as long as player keeps restarting
+  bool should_restart = true;
+  while (should_restart) {
+    printf("Restarting!\n");
+    gameloop();
 
-  // Gameloop
-  bool is_game_running = true;
-  uint32_t last_update_time = SDL_GetTicks();
-  uint32_t last_input_time = SDL_GetTicks();
-  SDL_Event event;
-  while (is_game_running) {
-    uint32_t start_time = SDL_GetTicks();
-
-    // event handling
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
-        is_game_running = false;
-      }
-      else if (event.type == SDL_KEYDOWN) {
-        switch (event.key.keysym.sym) {
-          case SDLK_RETURN:
-            is_game_running = false;
-            break;
-          case SDLK_w:
-            rotateTetrominoRight(tilemap, piece);
-            break;
-          case SDLK_s:
-            rotateTetrominoLeft(tilemap, piece);
-            break;
-          case SDLK_d:
-            movePieceRight(piece, tilemap, &last_input_time);
-            break;
-          case SDLK_a:
-            movePieceLeft(piece, tilemap, &last_input_time);
-            break;
-          case SDLK_SPACE:
-            dropPiece(&piece, tilemap);
-            break;
-        }
-      }
-    }
-
-    // update screen
-    refreshScreen();
-
-    drawTetromino(piece);
-    drawTileMap(tilemap);
-
-    SDL_RenderPresent(renderer);
-
-    // game logic
-    updatePiece(tilemap, &piece, &last_update_time, TICK_RATE);
-
-
-    // Cap Framerate
-    SDL_Delay(floor(FRAME_INTERVAL - getElapsedTime(start_time)));
+    should_restart = gameover();
   }
-
-  
-  // cleanup
-  destroyTetromino(piece);
-  destroyTileMap(tilemap);
 
   cleanup_SDL();
   printf("Sucess!\n");
@@ -158,6 +106,68 @@ float getElapsedTime(uint32_t last_time) {
 
 
 
+void gameloop() {
+  tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
+  tetromino *piece = createRandomTetromino();
+
+  bool is_game_running = true;
+  uint32_t last_update_time = SDL_GetTicks();
+  uint32_t last_input_time = SDL_GetTicks();
+  SDL_Event event;
+
+  // Game loop
+  while (is_game_running) {
+    uint32_t start_time = SDL_GetTicks();
+
+    // event handling
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        is_game_running = false;
+      }
+      else if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+          case SDLK_RETURN:
+            is_game_running = false;
+            break;
+          case SDLK_w:
+            rotateTetrominoRight(tilemap, piece);
+            break;
+          case SDLK_s:
+            rotateTetrominoLeft(tilemap, piece);
+            break;
+          case SDLK_d:
+            movePieceRight(piece, tilemap, &last_input_time);
+            break;
+          case SDLK_a:
+            movePieceLeft(piece, tilemap, &last_input_time);
+            break;
+          case SDLK_SPACE:
+            // end game if piece drops 
+            is_game_running = dropPiece(&piece, tilemap);
+            break;
+        }
+      }
+    }
+
+    // update screen
+    refreshScreen();
+
+    drawTetromino(piece);
+    drawTileMap(tilemap);
+
+    SDL_RenderPresent(renderer);
+
+    // game logic
+    is_game_running = updatePiece(tilemap, &piece, &last_update_time, TICK_RATE);
+
+    // Cap Framerate
+    SDL_Delay(floor(FRAME_INTERVAL - getElapsedTime(start_time)));
+  }
+
+  // cleanup game state
+  destroyTetromino(piece);
+  destroyTileMap(tilemap);
+}
 
 
 
@@ -196,16 +206,16 @@ void drawTileMap(tilemap_t *tilemap) {
   }
 }
 
-void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed) {
+bool updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed) {
   // check whether enough time has passed since last update
   if (getElapsedTime(*last_update_time) < floor(game_speed)) {
-    return;
+    return true;
   }
 
-  // apply gravity to piece
-  movePieceDown(piece, tilemap);
-
   *last_update_time = SDL_GetTicks();
+
+  // apply gravity to piece
+  return movePieceDown(piece, tilemap);
 }
 
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time) {
@@ -244,7 +254,9 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
   *last_input_time = SDL_GetTicks();
 }
 
-void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
+// Moves the tetromino down one tile
+// Returns true if piece is moved successfully, or false on game over
+bool movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
   static bool has_been_on_ground = false;
   tetromino *piece = *piece_ptr;
 
@@ -257,25 +269,22 @@ void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
     // give the player an extra i-frame when first hitting the ground
     if (!has_been_on_ground) {
       has_been_on_ground = true;
-      return;
+      return true;
     }
-
-    // place piece down
-    tileify(tilemap, piece);
-
-    // remove any rows that were filled
-    handleFilledRows(tilemap);
-
-    // replace current piece with a new tetromino
-    destroyTetromino(piece);
-    *piece_ptr = createRandomTetromino();
 
     // reset i-frame status
     has_been_on_ground = false;
+
+    // place piece down and check if it results in a game over
+    return placePiece(piece_ptr, tilemap);
   }
+
+  return true;
 }
 
-void dropPiece(tetromino **piece_ptr, tilemap_t *tilemap) {
+// Instantly drops the tetromino onto the ground
+// Returns true if piece is placed successfully, or false on game over
+bool dropPiece(tetromino **piece_ptr, tilemap_t *tilemap) {
   tetromino *piece = *piece_ptr;
 
   // move piece down until a collision occurs
@@ -286,8 +295,18 @@ void dropPiece(tetromino **piece_ptr, tilemap_t *tilemap) {
   // undo collision
   piece->row--;
 
-  // place piece
-  tileify(tilemap, piece);
+  // place piece down and check if it results in a game over
+  return placePiece(piece_ptr, tilemap);
+}
+
+// Places piece down in tilemap and checks if it results in a game over
+// Returns true if piece is placed successfully, or false on game over
+bool placePiece(tetromino **piece_ptr, tilemap_t *tilemap) {
+  tetromino *piece = *piece_ptr;
+  bool is_game_over = !tileify(tilemap, piece);
+  if (is_game_over) {
+    return false;
+  }
 
   // remove any rows that were filled
   handleFilledRows(tilemap);
@@ -295,15 +314,25 @@ void dropPiece(tetromino **piece_ptr, tilemap_t *tilemap) {
   // replace current piece with a new tetromino
   destroyTetromino(piece);
   *piece_ptr = createRandomTetromino();
+
+  return true;
 }
 
-void tileify(tilemap_t *tilemap, tetromino *piece) {
+// Places a tetromino into the tilemap
+// Returns true if successful, or false if the piece would be placed out of bounds (game over)
+bool tileify(tilemap_t *tilemap, tetromino *piece) {
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
       tetromino_state *piece_state = getTetrominoState(piece);
       if ((*piece_state)[row][col]) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
+
+        // game is over if
+        if (board_row < 0) {
+          return false;
+        }
+
         SDL_Color *color = getTetrominoColor(piece->type);
         tile_t *new_tile = createTile(board_col, board_row, color, TILE_SIZE);
 
@@ -311,6 +340,8 @@ void tileify(tilemap_t *tilemap, tetromino *piece) {
       }
     }
   }
+
+  return true;
 }
 
 
@@ -358,6 +389,11 @@ void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
       }
     }
   }
+}
+
+bool gameover() {
+  printf("Game Over!\n");
+  return true;
 }
 
 
