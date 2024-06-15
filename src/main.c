@@ -281,6 +281,9 @@ void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
     // place piece down
     tileify(tilemap, *piece_ptr);
 
+    // remove any rows that were filled
+    handleFilledRows(tilemap);
+
     // replace current piece with a new tetromino
     destroyTetromino(*piece_ptr);
     *piece_ptr = createRandomTetromino();
@@ -305,3 +308,53 @@ void tileify(tilemap_t *tilemap, tetromino *piece) {
     }
   }
 }
+
+
+void handleFilledRows(tilemap_t *tilemap) {
+  for (int row = tilemap->num_rows - 1; row >= 0; row--) {
+    // check rows from bottom to top to see if filled
+    bool is_full_row = true;
+    for (int col = 0; col < tilemap->num_cols; col++) {
+      // if tile at column is empty, row not filled
+      tile_t *tile = getTile(tilemap, row, col);
+      if (tile == NULL) {
+        is_full_row = false;
+        break;
+      }
+    }
+
+    if (is_full_row) {
+      // destroy current row
+      for (int col = 0; col < tilemap->num_cols; col++) {
+        tile_t *tile = getTile(tilemap, row, col);
+        removeTile(tilemap, tile);
+      }
+
+      // shift all rows above it down by one
+      shiftRowsDown(tilemap, row - 1);
+
+      // recheck current row for filledness since we shifted
+      row++;
+    }
+  }
+}
+
+
+void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
+  for (int row = starting_row; row >= 0; row--) {
+    for (int col = 0; col < tilemap->num_cols; col++) {
+      tile_t *shifting_tile = getTile(tilemap, row, col);
+      if (shifting_tile != NULL) {
+        // copy shifting tile to one row down
+        tile_t *new_tile = createTile(col, row + 1, shifting_tile->color, TILE_SIZE);
+        addTile(tilemap, new_tile);
+
+        // remove shifting tile from tilemap
+        removeTile(tilemap, shifting_tile);
+      }
+    }
+  }
+}
+
+
+

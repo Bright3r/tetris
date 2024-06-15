@@ -20,6 +20,7 @@ int getTileMapIdx(tilemap_t *tilemap, int row, int col);
 int getTileIdx(tilemap_t *tilemap, tile_t *tile);
 void destroyTileMap(tilemap_t *tilemap);
 void addTile(tilemap_t *tilemap, tile_t *tile);
+void removeTile(tilemap_t *tilemap, tile_t *tile);
 tile_t *getTile(tilemap_t *tilemap, int row, int col);
 
 

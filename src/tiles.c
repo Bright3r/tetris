@@ -71,7 +71,7 @@ void addTile(tilemap_t *tilemap, tile_t *tile) {
 }
 
 
-void removetile(tilemap_t *tilemap, tile_t *tile) {
+void removeTile(tilemap_t *tilemap, tile_t *tile) {
   int tile_idx = getTileIdx(tilemap, tile);
   destroyTile(tile);
 

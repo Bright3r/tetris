@@ -22,6 +22,7 @@ void init();
 void cleanup_SDL();
 void refreshScreen();
 void setRenderColor(SDL_Color *color);
+float getElapsedTime(uint32_t last_time);
 void drawTile(tile_t *tile);
 void drawAnonymousTile(int col, int row, SDL_Color *color);
 tilemap_t *createTileMap();
@@ -32,7 +33,7 @@ void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_t
 void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap);
 void tileify(tilemap_t *tilemap, tetromino *piece);
-float getElapsedTime(uint32_t last_time);
-
+void handleFilledRows(tilemap_t *tilemap);
+void shiftRowsDown(tilemap_t *tilemap, int starting_row);
 
 
