@@ -9,14 +9,18 @@ typedef struct tile_t {
 
 typedef struct tilemap_t {
   tile_t **map;
-  int num_tiles;
+  bool *is_filled;
+  int num_rows, num_cols;
 } tilemap_t;
 
 tile_t *createTile(int col, int row, SDL_Color *color, int tile_size);
 void destroyTile(tile_t *tile);
 tilemap_t *createTileMap(int num_rows, int num_cols);
+int getTileMapIdx(tilemap_t *tilemap, int row, int col);
+int getTileIdx(tilemap_t *tilemap, tile_t *tile);
 void destroyTileMap(tilemap_t *tilemap);
 void addTile(tilemap_t *tilemap, tile_t *tile);
+tile_t *getTile(tilemap_t *tilemap, int row, int col);
 
 
 

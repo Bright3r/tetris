@@ -226,10 +226,10 @@ int getRightmostCol(tetromino *piece);
 int getLeftmostCol(tetromino *piece);
 bool isOnFloor(tetromino *piece);
 bool checkBorderCollisions(tetromino *piece);
-bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap);
+bool checkTileCollisions(tilemap_t *tilemap, tetromino *piece);
 bool checkCollisionWithTile(tetromino *piece, tile_t *tile);
-void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap);
-void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap);
+void rotateTetrominoRight(tilemap_t *tilemap, tetromino *piece);
+void rotateTetrominoLeft(tilemap_t *tilemap, tetromino *piece);
 
 
 

@@ -36,10 +36,10 @@ int main(void) {
             is_game_running = false;
             break;
           case SDLK_w:
-            rotateTetrominoRight(piece, tilemap);
+            rotateTetrominoRight(tilemap, piece);
             break;
           case SDLK_s:
-            rotateTetrominoLeft(piece, tilemap);
+            rotateTetrominoLeft(tilemap, piece);
             break;
           case SDLK_d:
             is_moving_right = true;
@@ -205,8 +205,13 @@ void drawTetromino(tetromino *piece) {
 }
 
 void drawTileMap(tilemap_t *tilemap) {
-  for (int i = 0; i < tilemap->num_tiles; i++) {
-    drawTile(tilemap->map[i]);
+  for (int row = 0; row < tilemap->num_rows; row++) {
+    for (int col = 0; col < tilemap->num_cols; col++) {
+      tile_t *tile = getTile(tilemap, row, col);
+      if (tile != NULL) {
+        drawTile(getTile(tilemap, row, col));
+      }
+    }
   }
 }
 
@@ -232,7 +237,7 @@ void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_t
   piece->col++;
 
   // check if move results in collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+  if (checkBorderCollisions(piece) || checkTileCollisions(tilemap, piece)) {
     // undo move
     piece->col--;
   }
@@ -250,7 +255,7 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
   piece->col--;
 
   // check if move results in collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+  if (checkBorderCollisions(piece) || checkTileCollisions(tilemap, piece)) {
     // undo move
     piece->col++;
   }
@@ -258,14 +263,14 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
   *last_input_time = SDL_GetTicks();
 }
 
-void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
+void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap) {
   static bool has_been_on_ground = false;
 
   // move piece and check whether the move results in a collision
-  (*piece)->row++;
-  if (isOnFloor(*piece) || checkTileCollisions(*piece, tilemap)) {
+  (*piece_ptr)->row++;
+  if (isOnFloor(*piece_ptr) || checkTileCollisions(tilemap, *piece_ptr)) {
     // undo move
-    (*piece)->row--;
+    (*piece_ptr)->row--;
 
     // give the player an extra i-frame when first hitting the ground
     if (!has_been_on_ground) {
@@ -274,11 +279,11 @@ void movePieceDown(tetromino **piece, tilemap_t *tilemap) {
     }
 
     // place piece down
-    tileify(tilemap, *piece);
+    tileify(tilemap, *piece_ptr);
 
     // replace current piece with a new tetromino
-    destroyTetromino(*piece);
-    *piece = createRandomTetromino();
+    destroyTetromino(*piece_ptr);
+    *piece_ptr = createRandomTetromino();
 
     // reset i-frame status
     has_been_on_ground = false;
@@ -293,7 +298,9 @@ void tileify(tilemap_t *tilemap, tetromino *piece) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
         SDL_Color *color = getTetrominoColor(piece->type);
-        addTile(tilemap, createTile(board_col, board_row, color, TILE_SIZE));
+        tile_t *new_tile = createTile(board_col, board_row, color, TILE_SIZE);
+
+        addTile(tilemap, new_tile);
       }
     }
   }

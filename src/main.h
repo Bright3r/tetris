@@ -30,7 +30,7 @@ void drawTileMap(tilemap_t *tilemap);
 void updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed);
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
-void movePieceDown(tetromino **piece, tilemap_t *tilemap);
+void movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap);
 void tileify(tilemap_t *tilemap, tetromino *piece);
 float getElapsedTime(uint32_t last_time);
 

@@ -125,12 +125,14 @@ bool checkBorderCollisions(tetromino *piece) {
   return false;
 }
 
-bool checkTileCollisions(tetromino *piece, tilemap_t *tilemap) {
+bool checkTileCollisions(tilemap_t *tilemap, tetromino *piece) {
   // check if piece collides with any tiles
-  for (int i = 0; i < tilemap->num_tiles; i++) {
-    tile_t *curr_tile = tilemap->map[i];
-    if (checkCollisionWithTile(piece, curr_tile)) {
-      return true;
+  for (int row = 0; row < tilemap->num_rows; row++) {
+    for (int col = 0; col < tilemap->num_cols; col++) {
+      tile_t *curr_tile = getTile(tilemap, row, col);
+      if (curr_tile != NULL && checkCollisionWithTile(piece, curr_tile)) {
+        return true;
+      }
     }
   }
 
@@ -160,7 +162,7 @@ bool isOnFloor(tetromino *piece) {
   return bottom_row >= MAX_ROWS;
 }
 
-void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap) {
+void rotateTetrominoRight(tilemap_t *tilemap, tetromino *piece) {
   int temp_state_idx = piece->state_idx;
 
   // Change piece to next state
@@ -168,13 +170,13 @@ void rotateTetrominoRight(tetromino *piece, tilemap_t *tilemap) {
   piece->state_idx = new_state_idx;
 
   // Check if new state results in a collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+  if (checkBorderCollisions(piece) || checkTileCollisions(tilemap, piece)) {
     // Undo state change
     piece->state_idx = temp_state_idx;
   }
 }
 
-void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap) {
+void rotateTetrominoLeft(tilemap_t *tilemap, tetromino *piece) {
   int temp_state_idx = piece->state_idx;
 
   // Change piece to next state
@@ -182,7 +184,7 @@ void rotateTetrominoLeft(tetromino *piece, tilemap_t *tilemap) {
   piece->state_idx = new_state_idx;
 
   // Check if new state results in a collision
-  if (checkBorderCollisions(piece) || checkTileCollisions(piece, tilemap)) {
+  if (checkBorderCollisions(piece) || checkTileCollisions(tilemap, piece)) {
     // Undo state change
     piece->state_idx = temp_state_idx;
   }
