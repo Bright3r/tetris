@@ -24,21 +24,25 @@ void refreshScreen();
 void setRenderColor(SDL_Color *color);
 float getElapsedTime(uint32_t last_time);
 void drawGridLines();
+void drawText(SDL_Color *color, int x, int y, char *msg);
+void drawScore(int score);
 void gameloop();
 void drawTile(tile_t *tile);
 void drawAnonymousTile(int col, int row, SDL_Color *color);
-tilemap_t *createTileMap();
 void drawTetromino(tetromino *piece);
+void drawNextTetromino(tetromino *piece);
 void drawTileMap(tilemap_t *tilemap);
-bool updatePiece(tilemap_t *tilemap, tetromino **piece, uint32_t *last_update_time, float game_speed);
+bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_piece_ptr, uint32_t *last_update_time, float game_speed);
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
-bool movePieceDown(tetromino **piece_ptr, tilemap_t *tilemap);
-bool dropPiece(tetromino **piece_ptr, tilemap_t *tilemap);
-bool placePiece(tetromino **piece_ptr, tilemap_t *tilemap);
+bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
+bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
+bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
 bool tileify(tilemap_t *tilemap, tetromino *piece);
 void handleFilledRows(tilemap_t *tilemap);
 void shiftRowsDown(tilemap_t *tilemap, int starting_row);
 bool gameover();
+
+
 
 
