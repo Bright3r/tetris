@@ -1,12 +1,18 @@
 #include "main.h"
 
-static const int window_width = MAX_COLUMNS * TILE_SIZE;
+static const int window_width = MAX_COLUMNS * TILE_SIZE * 2;
 static const int window_height = MAX_ROWS * TILE_SIZE;
+
+static const int gameboard_width = MAX_COLUMNS * TILE_SIZE;
+static const int gameboard_height = MAX_ROWS * TILE_SIZE;
+
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
 static TTF_Font *font;
 static Mix_Music *music;
+
+static int score = 0;
 
 int main(void) {
   init(); // Initialize SDL2
@@ -102,6 +108,46 @@ float getElapsedTime(uint32_t last_time) {
   return SDL_GetTicks() - last_time;
 }
 
+void drawGridLines() {
+  setRenderColor(&COLOR_WHITE);
+  for (int row = 0; row <= MAX_ROWS; row++) {
+    int row_height = row * TILE_SIZE;
+    if (row_height == gameboard_height) {
+      row_height--;
+    }
+    SDL_RenderDrawLine(renderer, 0, row_height, gameboard_width, row_height);
+  }
+
+  for (int col = 0; col <= MAX_COLUMNS; col++) {
+    int col_width = col * TILE_SIZE;
+    if (col_width == gameboard_width) {
+      col_width--;
+    }
+    SDL_RenderDrawLine(renderer, col_width, 0, col_width, gameboard_height);
+  }
+}
+
+void drawText(SDL_Color *color, int x, int y, char *msg) {
+  SDL_Surface *text_surface = TTF_RenderText_Solid(font, msg, *color);
+  SDL_Texture *text = SDL_CreateTextureFromSurface(renderer, text_surface);
+
+  // Draw text such that (x, y) is the center
+  SDL_Rect dest = {x - (text_surface->w / 2), y - (text_surface->h / 2), text_surface->w, text_surface->h};
+  SDL_RenderCopy(renderer, text, NULL, &dest);
+
+  SDL_DestroyTexture(text);
+  SDL_FreeSurface(text_surface);
+}
+
+void drawScore(int score) {
+  // Get score as a string
+  char score_text[10] = {0};
+  sprintf(score_text, "%d", score);
+
+  drawText(&COLOR_WHITE, window_width * 3 / 4, TILE_SIZE, "SCORE");
+  drawText(&COLOR_WHITE, window_width * 3 / 4, TILE_SIZE * 2, score_text);
+}
+
 
 
 
@@ -118,6 +164,7 @@ void gameloop() {
   // Game loop
   while (is_game_running) {
     uint32_t start_time = SDL_GetTicks();
+    bool piece_moved_successfully = false;
 
     // event handling
     while (SDL_PollEvent(&event)) {
@@ -143,7 +190,7 @@ void gameloop() {
             break;
           case SDLK_SPACE:
             // end game if piece drops 
-            is_game_running = dropPiece(&piece, tilemap);
+            piece_moved_successfully = dropPiece(&piece, tilemap);
             break;
         }
       }
@@ -154,11 +201,18 @@ void gameloop() {
 
     drawTetromino(piece);
     drawTileMap(tilemap);
+    drawGridLines();
+    drawScore(score);
 
     SDL_RenderPresent(renderer);
 
     // game logic
-    is_game_running = updatePiece(tilemap, &piece, &last_update_time, TICK_RATE);
+    piece_moved_successfully = updatePiece(tilemap, &piece, &last_update_time, TICK_RATE);
+
+    // end game if moving piece resulted in a game over
+    if (is_game_running) {
+      is_game_running = piece_moved_successfully;
+    }
 
     // Cap Framerate
     SDL_Delay(floor(FRAME_INTERVAL - getElapsedTime(start_time)));
@@ -346,6 +400,7 @@ bool tileify(tilemap_t *tilemap, tetromino *piece) {
 
 
 void handleFilledRows(tilemap_t *tilemap) {
+  int rows_filled = 0;
   for (int row = tilemap->num_rows - 1; row >= 0; row--) {
     // check rows from bottom to top to see if filled
     bool is_full_row = true;
@@ -359,6 +414,8 @@ void handleFilledRows(tilemap_t *tilemap) {
     }
 
     if (is_full_row) {
+      rows_filled++;
+
       // destroy current row
       for (int col = 0; col < tilemap->num_cols; col++) {
         tile_t *tile = getTile(tilemap, row, col);
@@ -371,6 +428,22 @@ void handleFilledRows(tilemap_t *tilemap) {
       // recheck current row for filledness since we shifted
       row++;
     }
+  }
+
+  // add points to score based on how many lines were cleared
+  switch (rows_filled) {
+    case 1:
+      score += 40;
+      break;
+    case 2:
+      score += 100;
+      break;
+    case 3:
+      score += 300;
+      break;
+    case 4:
+      score += 1200;
+      break;
   }
 }
 
@@ -393,7 +466,7 @@ void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
 
 bool gameover() {
   printf("Game Over!\n");
-  return true;
+  return false;
 }
 
 

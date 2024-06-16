@@ -23,6 +23,7 @@ void cleanup_SDL();
 void refreshScreen();
 void setRenderColor(SDL_Color *color);
 float getElapsedTime(uint32_t last_time);
+void drawGridLines();
 void gameloop();
 void drawTile(tile_t *tile);
 void drawAnonymousTile(int col, int row, SDL_Color *color);
