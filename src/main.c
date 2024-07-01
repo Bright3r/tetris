@@ -156,8 +156,10 @@ void gameloop() {
   tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
   tetromino *piece = createRandomTetromino();
   tetromino *next_piece = createRandomTetromino();
+  tetromino *hold_piece = createRandomTetromino();
 
   bool is_game_running = true;
+  bool is_holding_piece = false;
   uint32_t last_update_time = SDL_GetTicks();
   uint32_t last_input_time = SDL_GetTicks();
   SDL_Event event;
@@ -191,7 +193,13 @@ void gameloop() {
             break;
           case SDLK_SPACE:
             // end game if piece drops 
-            piece_moved_successfully = dropPiece(&piece, &next_piece, tilemap);
+            piece_moved_successfully = dropPiece(&piece, &next_piece, tilemap, &is_holding_piece);
+            break;
+          case SDLK_c:
+            if (!is_holding_piece) {
+              swapPieces(&piece, &hold_piece);
+              is_holding_piece = true;
+            }
             break;
         }
       }
@@ -202,6 +210,7 @@ void gameloop() {
 
     drawTetromino(piece);
     drawNextTetromino(next_piece);
+    drawHeldTetromino(hold_piece);
     drawTileMap(tilemap);
     drawGridLines();
     drawScore(score);
@@ -209,7 +218,7 @@ void gameloop() {
     SDL_RenderPresent(renderer);
 
     // game logic
-    piece_moved_successfully = updatePiece(tilemap, &piece, &next_piece, &last_update_time, TICK_RATE);
+    piece_moved_successfully = updatePiece(tilemap, &piece, &next_piece, &is_holding_piece, &last_update_time, TICK_RATE);
 
     // end game if moving piece resulted in a game over
     if (is_game_running) {
@@ -225,6 +234,7 @@ void gameloop() {
   destroyTetromino(next_piece);
   destroyTileMap(tilemap);
 }
+
 
 
 
@@ -265,6 +275,19 @@ void drawNextTetromino(tetromino *piece) {
   }
 }
 
+void drawHeldTetromino(tetromino *piece) {
+  for (int row = 0; row < TETROMINO_WIDTH; row++) {
+    for (int col = 0; col < TETROMINO_WIDTH; col++) {
+      tetromino_state *piece_state = getTetrominoState(piece);
+      if ((*piece_state)[row][col]) {
+        int next_piece_row = 11 + row;
+        int next_piece_col = 12 + col;
+        drawAnonymousTile(next_piece_col, next_piece_row, getTetrominoColor(piece->type));
+      }
+    }
+  }
+}
+
 void drawTileMap(tilemap_t *tilemap) {
   for (int row = 0; row < tilemap->num_rows; row++) {
     for (int col = 0; col < tilemap->num_cols; col++) {
@@ -276,7 +299,9 @@ void drawTileMap(tilemap_t *tilemap) {
   }
 }
 
-bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_piece_ptr, uint32_t *last_update_time, float game_speed) {
+// Moves the tetromino down one tile every game tick
+// Returns true if piece is moved successfully, or false on game over
+bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_piece_ptr, bool *is_holding_piece, uint32_t *last_update_time, float game_speed) {
   // check whether enough time has passed since last update
   if (getElapsedTime(*last_update_time) < floor(game_speed)) {
     return true;
@@ -285,7 +310,7 @@ bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_pie
   *last_update_time = SDL_GetTicks();
 
   // apply gravity to piece
-  return movePieceDown(piece_ptr, next_piece_ptr, tilemap);
+  return movePieceDown(piece_ptr, next_piece_ptr, tilemap, is_holding_piece);
 }
 
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time) {
@@ -326,7 +351,7 @@ void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_ti
 
 // Moves the tetromino down one tile
 // Returns true if piece is moved successfully, or false on game over
-bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap) {
+bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece) {
   static bool has_been_on_ground = false;
   tetromino *piece = *piece_ptr;
 
@@ -346,15 +371,16 @@ bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t 
     has_been_on_ground = false;
 
     // place piece down and check if it results in a game over
-    return placePiece(piece_ptr, next_piece_ptr, tilemap);
+    return placePiece(piece_ptr, next_piece_ptr, tilemap, is_holding_piece);
   }
 
   return true;
 }
 
+
 // Instantly drops the tetromino onto the ground
 // Returns true if piece is placed successfully, or false on game over
-bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap) {
+bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece) {
   tetromino *piece = *piece_ptr;
 
   // move piece down until a collision occurs
@@ -366,12 +392,12 @@ bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *til
   piece->row--;
 
   // place piece down and check if it results in a game over
-  return placePiece(piece_ptr, next_piece_ptr, tilemap);
+  return placePiece(piece_ptr, next_piece_ptr, tilemap, is_holding_piece);
 }
 
 // Places piece down in tilemap and checks if it results in a game over
 // Returns true if piece is placed successfully, or false on game over
-bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap) {
+bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece) {
   tetromino *piece = *piece_ptr;
   bool is_game_over = !tileify(tilemap, piece);
   if (is_game_over) {
@@ -385,9 +411,23 @@ bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *ti
   destroyTetromino(piece);
   *piece_ptr = *next_piece_ptr;
   *next_piece_ptr = createRandomTetromino();
+  *is_holding_piece = false;
 
   return true;
 }
+
+
+void swapPieces(tetromino **curr_piece, tetromino **hold_piece) {
+  // reset position of current piece
+  (*curr_piece)->row = -TETROMINO_WIDTH;
+  (*curr_piece)->col = (MAX_COLUMNS - TETROMINO_WIDTH) / 2;
+  
+  // hold current piece and switch to next piece
+  tetromino *temp = *hold_piece;
+  *hold_piece = *curr_piece;
+  *curr_piece = temp;
+}
+
 
 // Places a tetromino into the tilemap
 // Returns true if successful, or false if the piece would be placed out of bounds (game over)

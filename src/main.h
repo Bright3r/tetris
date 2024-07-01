@@ -11,7 +11,7 @@
 #include "tiles.c"
 #include "tetromino.c"
 
-#define TITLE "Title"
+#define TITLE "TETRIS"
 #define TILE_SIZE 25
 #define FRAME_INTERVAL 16.667f
 #define TICK_RATE 200.0f
@@ -31,13 +31,15 @@ void drawTile(tile_t *tile);
 void drawAnonymousTile(int col, int row, SDL_Color *color);
 void drawTetromino(tetromino *piece);
 void drawNextTetromino(tetromino *piece);
+void drawHeldTetromino(tetromino *piece);
 void drawTileMap(tilemap_t *tilemap);
-bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_piece_ptr, uint32_t *last_update_time, float game_speed);
+bool updatePiece(tilemap_t *tilemap, tetromino **piece_ptr, tetromino **next_piece_ptr, bool *is_holding_piece, uint32_t *last_update_time, float game_speed);
 void movePieceRight(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
 void movePieceLeft(tetromino *piece, tilemap_t *tilemap, uint32_t *last_input_time);
-bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
-bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
-bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap);
+bool movePieceDown(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece);
+bool dropPiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece);
+bool placePiece(tetromino **piece_ptr, tetromino **next_piece_ptr, tilemap_t *tilemap, bool *is_holding_piece);
+void swapPieces(tetromino **curr_piece, tetromino **hold_piece);
 bool tileify(tilemap_t *tilemap, tetromino *piece);
 void handleFilledRows(tilemap_t *tilemap);
 void shiftRowsDown(tilemap_t *tilemap, int starting_row);
