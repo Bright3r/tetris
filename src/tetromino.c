@@ -1,7 +1,7 @@
 
 #include "tetromino.h"
 
-tetromino *createTetromino(tetromino_type piece_type, int col, int row) {
+tetromino *createTetromino(tetromino_type piece_type, int row, int col) {
   tetromino *piece = (tetromino *) malloc(sizeof(tetromino));
   piece->type = piece_type;
   piece->state_idx = 0;
@@ -48,7 +48,7 @@ tetromino *createRandomTetromino() {
   static const int MIDDLE_COL = (MAX_COLUMNS - TETROMINO_WIDTH) / 2;
 
   tetromino_type random_piece_type = getTetrominoType(rand() % NUM_TETROMINO_TYPES);
-  tetromino *piece = createTetromino(random_piece_type, MIDDLE_COL, -TETROMINO_WIDTH);
+  tetromino *piece = createTetromino(random_piece_type, -TETROMINO_WIDTH, MIDDLE_COL);
   return piece;
 }
 

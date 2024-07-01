@@ -79,6 +79,8 @@ void init() {
   if (renderer == NULL) {
     fprintf(stderr, "Failed to render window: %s\n", SDL_GetError());
   }
+
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 }
 
 
@@ -208,7 +210,8 @@ void gameloop() {
     // update screen
     refreshScreen();
 
-    drawTetromino(piece);
+    drawTetromino(piece, getTetrominoColor(piece->type));
+    drawGhostPiece(tilemap, piece);
     drawNextTetromino(next_piece);
     drawHeldTetromino(hold_piece);
     drawTileMap(tilemap);
@@ -249,14 +252,14 @@ void drawAnonymousTile(int col, int row, SDL_Color *color) {
   destroyTile(tile);
 }
 
-void drawTetromino(tetromino *piece) {
+void drawTetromino(tetromino *piece, SDL_Color *color) {
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
       tetromino_state *piece_state = getTetrominoState(piece);
       if ((*piece_state)[row][col]) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
-        drawAnonymousTile(board_col, board_row, getTetrominoColor(piece->type));
+        drawAnonymousTile(board_col, board_row, color);
       }
     }
   }
@@ -297,6 +300,26 @@ void drawTileMap(tilemap_t *tilemap) {
       }
     }
   }
+}
+
+void drawGhostPiece(tilemap_t *tilemap, tetromino *piece) {
+  // clone piece
+  tetromino *ghost = createTetromino(piece->type, piece->row, piece->col);
+  ghost->state_idx = piece->state_idx;
+
+  // drop piece until there is a collision
+  while (!isOnFloor(ghost) && !checkTileCollisions(tilemap, ghost)) {
+    printf("Inc\n");
+    ghost->row++;
+  }
+  ghost->row--;
+
+  SDL_Color *piece_color = getTetrominoColor(piece->type);
+  SDL_Color ghost_color = { piece_color->r, piece_color->g, piece_color->b, piece_color->a * 0.5 };
+  printf("Alpha: %d\n", ghost_color.a);
+  drawTetromino(ghost, &ghost_color);
+
+  destroyTetromino(ghost);
 }
 
 // Moves the tetromino down one tile every game tick

@@ -215,7 +215,7 @@ static const tetromino_state Z_PIECE_STATES[NUM_TETROMINO_PERMUTATIONS] = {
 
 
 
-tetromino *createTetromino(tetromino_type piece_type, int col, int row);
+tetromino *createTetromino(tetromino_type piece_type, int row, int col);
 void destroyTetromino(tetromino *piece);
 tetromino_type getTetrominoType(int idx);
 tetromino_state *getTetrominoState(tetromino *piece);
