@@ -117,8 +117,6 @@ bool checkBorderCollisions(tetromino *piece) {
   int leftmost_col = getLeftmostCol(piece);
   int rightmost_col = getRightmostCol(piece);
 
-  printf("BOTTOM ROW: %d, LEFT COL: %d, RIGHT COL: %d\n", bottom_row, leftmost_col, rightmost_col);
-
   if (bottom_row >= MAX_ROWS || leftmost_col < 0 || rightmost_col >= MAX_COLUMNS) {
     return true;
   }

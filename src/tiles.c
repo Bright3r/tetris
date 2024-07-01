@@ -22,13 +22,11 @@ void destroyTile(tile_t *tile) {
 }
 
 tilemap_t *createTileMap(int num_rows, int num_cols) {
-  tilemap_t *tilemap = (tilemap_t *) malloc(sizeof(tilemap));
+  tilemap_t *tilemap = (tilemap_t *) malloc(sizeof(tilemap_t));
   tilemap->map = (tile_t **) calloc(num_rows * num_cols, sizeof(tile_t *));
+  tilemap->is_filled = (bool *) calloc(num_rows * num_cols, sizeof(bool));
   tilemap->num_rows = num_rows;
   tilemap->num_cols = num_cols;
-
-  bool *is_filled = (bool *) calloc(num_rows * num_cols, sizeof(bool));
-  tilemap->is_filled = is_filled;
 
   return tilemap;
 }
