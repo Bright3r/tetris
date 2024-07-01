@@ -16,6 +16,8 @@ static int score = 0;
 int main(void) {
   init(); // Initialize SDL2
   
+  startMenu();
+
   // Run game as long as player keeps restarting
   bool should_restart = true;
   while (should_restart) {
@@ -239,6 +241,26 @@ void gameloop() {
 }
 
 
+void startMenu() {
+  refreshScreen();
+  drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Press any key to start");
+  SDL_RenderPresent(renderer);
+
+  bool is_ready = false;
+  SDL_Event event;
+  while (!is_ready) {
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        cleanup_SDL();
+      }
+      else if (event.type == SDL_KEYDOWN) {
+        is_ready = true;
+      }
+    }
+
+    SDL_Delay(FRAME_INTERVAL);
+  }
+}
 
 
 void drawTile(tile_t *tile) {
@@ -309,14 +331,12 @@ void drawGhostPiece(tilemap_t *tilemap, tetromino *piece) {
 
   // drop piece until there is a collision
   while (!isOnFloor(ghost) && !checkTileCollisions(tilemap, ghost)) {
-    printf("Inc\n");
     ghost->row++;
   }
   ghost->row--;
 
   SDL_Color *piece_color = getTetrominoColor(piece->type);
   SDL_Color ghost_color = { piece_color->r, piece_color->g, piece_color->b, piece_color->a * 0.5 };
-  printf("Alpha: %d\n", ghost_color.a);
   drawTetromino(ghost, &ghost_color);
 
   destroyTetromino(ghost);
@@ -545,7 +565,44 @@ void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
 }
 
 bool gameover() {
-  printf("Game Over!\n");
+  // draw text
+  refreshScreen();
+  drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Game Over!");
+
+  char score_text[20] = {0};
+  sprintf(score_text, "Your Score: %d", score);
+  drawText(&COLOR_WHITE, window_width / 2, (window_height / 2) - TILE_SIZE, score_text);
+
+  char high_score_text[20] = {0};
+  sprintf(high_score_text, "High Score: TODO");
+  drawText(&COLOR_WHITE, window_width / 2, (window_height / 2), high_score_text);
+
+  drawText(&COLOR_WHITE, window_width / 2, (window_height * 3 / 4), "Press Esc to exit or Enter to play again!");
+  SDL_RenderPresent(renderer);
+
+  // reset score
+  score = 0;
+
+  // listen for user choice
+  SDL_Event event;
+  while (true) {
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        return false;
+      }
+      else if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+          case SDLK_ESCAPE:
+            return false;
+          case SDLK_RETURN:
+            return true;
+        }
+      }
+    }
+
+    SDL_Delay(FRAME_INTERVAL);
+  }
+
   return false;
 }
 

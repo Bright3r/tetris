@@ -27,6 +27,7 @@ void drawGridLines();
 void drawText(SDL_Color *color, int x, int y, char *msg);
 void drawScore(int score);
 void gameloop();
+void startMenu();
 void drawTile(tile_t *tile);
 void drawAnonymousTile(int col, int row, SDL_Color *color);
 void drawTetromino(tetromino *piece, SDL_Color *color);
