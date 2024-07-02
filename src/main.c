@@ -11,7 +11,10 @@ static SDL_Renderer *renderer;
 static TTF_Font *font;
 static Mix_Music *music;
 
+static int high_score = 0;
 static int score = 0;
+
+static float difficulty_multiplier = 1.0f;
 
 int main(void) {
   init(); // Initialize SDL2
@@ -264,7 +267,7 @@ void gameloop() {
     SDL_RenderPresent(renderer);
 
     // game logic
-    piece_moved_successfully = updatePiece(tilemap, &piece, &next_piece, &is_holding_piece, &last_update_time, TICK_RATE);
+    piece_moved_successfully = updatePiece(tilemap, &piece, &next_piece, &is_holding_piece, &last_update_time, TICK_RATE * difficulty_multiplier);
 
     // end game if moving piece resulted in a game over
     if (is_game_running) {
@@ -610,6 +613,9 @@ void handleFilledRows(tilemap_t *tilemap) {
       score += 1200;
       break;
   }
+
+  // increase difficulty
+  difficulty_multiplier *= 0.99f;
 }
 
 
@@ -630,6 +636,10 @@ void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
 }
 
 bool gameover() {
+  if (score > high_score) {
+    high_score = score;
+  }
+
   // draw text
   refreshScreen();
   drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Game Over!");
@@ -639,14 +649,15 @@ bool gameover() {
   drawText(&COLOR_WHITE, window_width / 2, (window_height / 2) - TILE_SIZE, score_text);
 
   char high_score_text[20] = {0};
-  sprintf(high_score_text, "High Score: TODO");
+  sprintf(high_score_text, "High Score: %d", high_score);
   drawText(&COLOR_WHITE, window_width / 2, (window_height / 2), high_score_text);
 
   drawText(&COLOR_WHITE, window_width / 2, (window_height * 3 / 4), "Press Esc to exit or Enter to play again!");
   SDL_RenderPresent(renderer);
 
-  // reset score
+  // reset game vars
   score = 0;
+  difficulty_multiplier = 1.0f;
 
   // listen for user choice
   SDL_Event event;
