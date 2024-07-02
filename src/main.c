@@ -231,7 +231,11 @@ void gameloop() {
     }
 
     // Cap Framerate
-    SDL_Delay(floor(FRAME_INTERVAL - getElapsedTime(start_time)));
+    Uint32 delay = (Uint32) floor(FRAME_INTERVAL - getElapsedTime(start_time));
+    if (delay > FRAME_INTERVAL) {
+      delay = 0;
+    }
+    SDL_Delay(delay);
   }
 
   // cleanup game state
