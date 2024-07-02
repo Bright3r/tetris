@@ -157,13 +157,19 @@ void drawScore(int score) {
 
 
 void gameloop() {
+  // Create game objects
   tilemap_t *tilemap = createTileMap(MAX_ROWS, MAX_COLUMNS);
   tetromino *piece = createRandomTetromino();
   tetromino *next_piece = createRandomTetromino();
   tetromino *hold_piece = createRandomTetromino();
 
-  bool is_game_running = true;
+  // User input flags
   bool is_holding_piece = false;
+  bool is_pressing_left = false;
+  bool is_pressing_right = false;
+
+  // Timing variables
+  bool is_game_running = true;
   uint32_t last_update_time = SDL_GetTicks();
   uint32_t last_input_time = SDL_GetTicks();
   SDL_Event event;
@@ -189,11 +195,23 @@ void gameloop() {
           case SDLK_s:
             rotateTetrominoLeft(tilemap, piece);
             break;
-          case SDLK_d:
-            movePieceRight(piece, tilemap, &last_input_time);
-            break;
           case SDLK_a:
-            movePieceLeft(piece, tilemap, &last_input_time);
+            is_pressing_left = true;
+            break;
+          case SDLK_d:
+            is_pressing_right = true;
+            break;
+          case SDLK_UP:
+            rotateTetrominoRight(tilemap, piece);
+            break;
+          case SDLK_DOWN:
+            rotateTetrominoLeft(tilemap, piece);
+            break;
+          case SDLK_LEFT:
+            is_pressing_left = true;
+            break;
+          case SDLK_RIGHT:
+            is_pressing_right = true;
             break;
           case SDLK_SPACE:
             // end game if piece drops 
@@ -207,6 +225,29 @@ void gameloop() {
             break;
         }
       }
+      else if (event.type == SDL_KEYUP) {
+        switch (event.key.keysym.sym) {
+          case SDLK_a:
+            is_pressing_left = false;
+            break;
+          case SDLK_d:
+            is_pressing_right = false;
+            break;
+          case SDLK_LEFT:
+            is_pressing_left = false;
+            break;
+          case SDLK_RIGHT:
+            is_pressing_right = false;
+            break;
+        }
+      }
+    }
+
+    if (is_pressing_left) {
+      movePieceLeft(piece, tilemap, &last_input_time);
+    }
+    if (is_pressing_right) {
+      movePieceRight(piece, tilemap, &last_input_time);
     }
 
     // update screen

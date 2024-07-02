@@ -15,7 +15,7 @@
 #define TILE_SIZE 25
 #define FRAME_INTERVAL 16.667f
 #define TICK_RATE 200.0f
-#define INPUT_REFRESH_RATE 50.0f
+#define INPUT_REFRESH_RATE 70.0f
 
 
 void init();
