@@ -288,11 +288,21 @@ void drawTetromino(tetromino *piece, SDL_Color *color) {
 }
 
 void drawNextTetromino(tetromino *piece) {
+  static SDL_Rect outline;
+  outline.x = 12 * TILE_SIZE;
+  outline.y = 4 * TILE_SIZE;
+  outline.w = 6 * TILE_SIZE;
+  outline.h = 7 * TILE_SIZE;
+  setRenderColor(&COLOR_WHITE);
+  SDL_RenderDrawRect(renderer, &outline);
+
+  drawText(&COLOR_WHITE, 15 * TILE_SIZE, 5 * TILE_SIZE, "Next");
+
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
       tetromino_state *piece_state = getTetrominoState(piece);
       if ((*piece_state)[row][col]) {
-        int next_piece_row = 7 + row;
+        int next_piece_row = 6 + row;
         int next_piece_col = 12 + col;
         drawAnonymousTile(next_piece_col, next_piece_row, getTetrominoColor(piece->type));
       }
@@ -301,11 +311,21 @@ void drawNextTetromino(tetromino *piece) {
 }
 
 void drawHeldTetromino(tetromino *piece) {
+  static SDL_Rect outline;
+  outline.x = 12 * TILE_SIZE;
+  outline.y = 12 * TILE_SIZE;
+  outline.w = 6 * TILE_SIZE;
+  outline.h = 7 * TILE_SIZE;
+  setRenderColor(&COLOR_WHITE);
+  SDL_RenderDrawRect(renderer, &outline);
+
+  drawText(&COLOR_WHITE, 15 * TILE_SIZE, 13 * TILE_SIZE, "Hold");
+
   for (int row = 0; row < TETROMINO_WIDTH; row++) {
     for (int col = 0; col < TETROMINO_WIDTH; col++) {
       tetromino_state *piece_state = getTetrominoState(piece);
       if ((*piece_state)[row][col]) {
-        int next_piece_row = 11 + row;
+        int next_piece_row = 14 + row;
         int next_piece_col = 12 + col;
         drawAnonymousTile(next_piece_col, next_piece_row, getTetrominoColor(piece->type));
       }
