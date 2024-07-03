@@ -57,14 +57,14 @@ void init() {
     fprintf(stderr, "SDL_Mixer has failed: %s\n", Mix_GetError());
   }
 
-  // // Play background music
-  // music = Mix_LoadMUS("./assets/sounds/music.mp3");
-  // if (music == NULL) {
-  //   fprintf(stderr, "Failed to load music: %s\n", Mix_GetError());
-  // }
-  // else if (Mix_PlayMusic(music, -1) < 0) {
-  //   fprintf(stderr, "Failed to play music: %s\n", Mix_GetError());
-  // }
+  // Play background music
+  music = Mix_LoadMUS("./assets/sounds/music.mp3");
+  if (music == NULL) {
+    fprintf(stderr, "Failed to load music: %s\n", Mix_GetError());
+  }
+  else if (Mix_PlayMusic(music, -1) < 0) {
+    fprintf(stderr, "Failed to play music: %s\n", Mix_GetError());
+  }
 
   // Load Sound Effects
   // chompSound = Mix_LoadWAV("./assets/sounds/chomp.mp3");
