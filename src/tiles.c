@@ -43,6 +43,7 @@ void destroyTileMap(tilemap_t *tilemap) {
   }
 
   free(tilemap->map);
+  free(tilemap->is_filled);
   free(tilemap);
 }
 
@@ -76,6 +77,22 @@ void removeTile(tilemap_t *tilemap, tile_t *tile) {
   tilemap->map[tile_idx] = NULL;
   tilemap->is_filled[tile_idx] = false;
 }
+
+
+void resizeTileMap(tilemap_t *tilemap, int new_tile_size) {
+  for (int row = 0; row < tilemap->num_rows; row++) {
+    for (int col = 0; col < tilemap->num_cols; col++) {
+      int tile_idx = getTileMapIdx(tilemap, row, col);
+      if (tilemap->is_filled[tile_idx]) {
+        tile_t *tile = getTile(tilemap, row, col);
+        tile_t *new_tile = createTile(tile->col, tile->row, tile->color, new_tile_size);
+        removeTile(tilemap, tile);
+        addTile(tilemap, new_tile);
+      }
+    }
+  }
+}
+
 
 
 

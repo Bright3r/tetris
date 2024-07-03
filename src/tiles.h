@@ -22,6 +22,7 @@ void destroyTileMap(tilemap_t *tilemap);
 void addTile(tilemap_t *tilemap, tile_t *tile);
 void removeTile(tilemap_t *tilemap, tile_t *tile);
 tile_t *getTile(tilemap_t *tilemap, int row, int col);
+void resizeTileMap(tilemap_t *tilemap, int new_tile_size);
 
 
 

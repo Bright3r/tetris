@@ -1,10 +1,10 @@
 #include "main.h"
 
-static const int window_width = MAX_COLUMNS * TILE_SIZE * 2;
-static const int window_height = MAX_ROWS * TILE_SIZE;
-
-static const int gameboard_width = MAX_COLUMNS * TILE_SIZE;
-static const int gameboard_height = MAX_ROWS * TILE_SIZE;
+static int TILE_SIZE = 25;
+static int window_width = 500;
+static int window_height = 500;
+static int gameboard_width = 250;
+static int gameboard_height = 500;
 
 static SDL_Window *window;
 static SDL_Renderer *renderer;
@@ -13,7 +13,6 @@ static Mix_Music *music;
 
 static int high_score = 0;
 static int score = 0;
-
 static float difficulty_multiplier = 1.0f;
 
 int main(void) {
@@ -75,7 +74,7 @@ void init() {
 
 
   // Create window and renderer
-  window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN);
+  window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
   if (window == NULL) {
     fprintf(stderr, "Failed to create window: %s\n", SDL_GetError());
   }
@@ -187,6 +186,9 @@ void gameloop() {
       if (event.type == SDL_QUIT) {
         is_game_running = false;
       }
+      else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+        handleWindowResize(tilemap);
+      }
       else if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
           case SDLK_RETURN:
@@ -290,10 +292,6 @@ void gameloop() {
 
 
 void startMenu() {
-  refreshScreen();
-  drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Press any key to start");
-  SDL_RenderPresent(renderer);
-
   bool is_ready = false;
   SDL_Event event;
   while (!is_ready) {
@@ -301,10 +299,17 @@ void startMenu() {
       if (event.type == SDL_QUIT) {
         cleanup_SDL();
       }
+      else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+        handleWindowResize(NULL);
+      }
       else if (event.type == SDL_KEYDOWN) {
         is_ready = true;
       }
     }
+
+    refreshScreen();
+    drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Press any key to start");
+    SDL_RenderPresent(renderer);
 
     SDL_Delay(FRAME_INTERVAL);
   }
@@ -640,21 +645,6 @@ bool gameover() {
     high_score = score;
   }
 
-  // draw text
-  refreshScreen();
-  drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Game Over!");
-
-  char score_text[20] = {0};
-  sprintf(score_text, "Your Score: %d", score);
-  drawText(&COLOR_WHITE, window_width / 2, (window_height / 2) - TILE_SIZE, score_text);
-
-  char high_score_text[20] = {0};
-  sprintf(high_score_text, "High Score: %d", high_score);
-  drawText(&COLOR_WHITE, window_width / 2, (window_height / 2), high_score_text);
-
-  drawText(&COLOR_WHITE, window_width / 2, (window_height * 3 / 4), "Press Esc to exit or Enter to play again!");
-  SDL_RenderPresent(renderer);
-
   // reset game vars
   score = 0;
   difficulty_multiplier = 1.0f;
@@ -666,6 +656,9 @@ bool gameover() {
       if (event.type == SDL_QUIT) {
         return false;
       }
+      else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+        handleWindowResize(NULL);
+      }
       else if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
           case SDLK_ESCAPE:
@@ -676,10 +669,41 @@ bool gameover() {
       }
     }
 
+    // draw text
+    refreshScreen();
+    drawText(&COLOR_WHITE, window_width / 2, window_height / 4, "Game Over!");
+
+    char score_text[20] = {0};
+    sprintf(score_text, "Your Score: %d", score);
+    drawText(&COLOR_WHITE, window_width / 2, (window_height / 2) - TILE_SIZE, score_text);
+
+    char high_score_text[20] = {0};
+    sprintf(high_score_text, "High Score: %d", high_score);
+    drawText(&COLOR_WHITE, window_width / 2, (window_height / 2), high_score_text);
+
+    drawText(&COLOR_WHITE, window_width / 2, (window_height * 3 / 4), "Press Esc to exit or Enter to play again!");
+    SDL_RenderPresent(renderer);
+
+    // Cap Framerate
     SDL_Delay(FRAME_INTERVAL);
   }
 
   return false;
+}
+
+void handleWindowResize(tilemap_t *tilemap) {
+  // adjust tile size if window size was changed
+  SDL_GetWindowSize(window, &window_width, &window_height);
+  TILE_SIZE = window_height / MAX_ROWS;
+
+  window_width = MAX_COLUMNS * TILE_SIZE * 2;
+  gameboard_width = MAX_COLUMNS * TILE_SIZE;
+  gameboard_height = MAX_ROWS * TILE_SIZE;
+  SDL_SetWindowSize(window, window_width, window_height);
+  
+  if (tilemap != NULL) {
+    resizeTileMap(tilemap, TILE_SIZE);
+  }
 }
 
 
