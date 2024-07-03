@@ -645,13 +645,11 @@ bool gameover() {
     high_score = score;
   }
 
-  // reset game vars
-  score = 0;
-  difficulty_multiplier = 1.0f;
-
   // listen for user choice
   SDL_Event event;
-  while (true) {
+  bool is_choosing = true;
+  bool choice = false;
+  while (is_choosing) {
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
         return false;
@@ -662,9 +660,12 @@ bool gameover() {
       else if (event.type == SDL_KEYDOWN) {
         switch (event.key.keysym.sym) {
           case SDLK_ESCAPE:
-            return false;
+            is_choosing = false;
+            break;
           case SDLK_RETURN:
-            return true;
+            choice = true;
+            is_choosing = false;
+            break;
         }
       }
     }
@@ -688,7 +689,11 @@ bool gameover() {
     SDL_Delay(FRAME_INTERVAL);
   }
 
-  return false;
+  // reset game vars
+  score = 0;
+  difficulty_multiplier = 1.0f;
+
+  return choice;
 }
 
 void handleWindowResize(tilemap_t *tilemap) {
