@@ -1,7 +1,7 @@
 
 #include "tiles.h"
 
-tile_t *createTile(int col, int row, SDL_Color *color, int tile_size) {  
+tile_t *createTile(int row, int col, SDL_Color *color, int tile_size) {  
   SDL_Rect *rect = (SDL_Rect *) malloc(sizeof(SDL_Rect));
   rect->y = row * tile_size;
   rect->x = col * tile_size;
@@ -85,7 +85,7 @@ void resizeTileMap(tilemap_t *tilemap, int new_tile_size) {
       int tile_idx = getTileMapIdx(tilemap, row, col);
       if (tilemap->is_filled[tile_idx]) {
         tile_t *tile = getTile(tilemap, row, col);
-        tile_t *new_tile = createTile(tile->col, tile->row, tile->color, new_tile_size);
+        tile_t *new_tile = createTile(tile->row, tile->col, tile->color, new_tile_size);
         removeTile(tilemap, tile);
         addTile(tilemap, new_tile);
       }

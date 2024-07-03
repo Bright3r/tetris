@@ -13,7 +13,7 @@ typedef struct tilemap_t {
   int num_rows, num_cols;
 } tilemap_t;
 
-tile_t *createTile(int col, int row, SDL_Color *color, int tile_size);
+tile_t *createTile(int row, int col, SDL_Color *color, int tile_size);
 void destroyTile(tile_t *tile);
 tilemap_t *createTileMap(int num_rows, int num_cols);
 int getTileMapIdx(tilemap_t *tilemap, int row, int col);

@@ -321,8 +321,8 @@ void drawTile(tile_t *tile) {
   SDL_RenderFillRect(renderer, tile->rect);
 }
 
-void drawAnonymousTile(int col, int row, SDL_Color *color) {
-  tile_t *tile = createTile(col, row, color, TILE_SIZE);
+void drawAnonymousTile(int row, int col, SDL_Color *color) {
+  tile_t *tile = createTile(row, col, color, TILE_SIZE);
   drawTile(tile);
   destroyTile(tile);
 }
@@ -334,7 +334,7 @@ void drawTetromino(tetromino *piece, SDL_Color *color) {
       if ((*piece_state)[row][col]) {
         int board_row = piece->row + row;
         int board_col = piece->col + col;
-        drawAnonymousTile(board_col, board_row, color);
+        drawAnonymousTile(board_row, board_col, color);
       }
     }
   }
@@ -357,7 +357,7 @@ void drawNextTetromino(tetromino *piece) {
       if ((*piece_state)[row][col]) {
         int next_piece_row = 6 + row;
         int next_piece_col = 12 + col;
-        drawAnonymousTile(next_piece_col, next_piece_row, getTetrominoColor(piece->type));
+        drawAnonymousTile(next_piece_row, next_piece_col, getTetrominoColor(piece->type));
       }
     }
   }
@@ -380,7 +380,7 @@ void drawHeldTetromino(tetromino *piece) {
       if ((*piece_state)[row][col]) {
         int next_piece_row = 14 + row;
         int next_piece_col = 12 + col;
-        drawAnonymousTile(next_piece_col, next_piece_row, getTetrominoColor(piece->type));
+        drawAnonymousTile(next_piece_row, next_piece_col, getTetrominoColor(piece->type));
       }
     }
   }
@@ -561,7 +561,7 @@ bool tileify(tilemap_t *tilemap, tetromino *piece) {
         }
 
         SDL_Color *color = getTetrominoColor(piece->type);
-        tile_t *new_tile = createTile(board_col, board_row, color, TILE_SIZE);
+        tile_t *new_tile = createTile(board_row, board_col, color, TILE_SIZE);
 
         addTile(tilemap, new_tile);
       }
@@ -630,7 +630,7 @@ void shiftRowsDown(tilemap_t *tilemap, int starting_row) {
       tile_t *shifting_tile = getTile(tilemap, row, col);
       if (shifting_tile != NULL) {
         // copy shifting tile to one row down
-        tile_t *new_tile = createTile(col, row + 1, shifting_tile->color, TILE_SIZE);
+        tile_t *new_tile = createTile(row + 1, col, shifting_tile->color, TILE_SIZE);
         addTile(tilemap, new_tile);
 
         // remove shifting tile from tilemap

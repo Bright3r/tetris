@@ -28,7 +28,7 @@ void drawScore(int score);
 void gameloop();
 void startMenu();
 void drawTile(tile_t *tile);
-void drawAnonymousTile(int col, int row, SDL_Color *color);
+void drawAnonymousTile(int row, int col, SDL_Color *color);
 void drawTetromino(tetromino *piece, SDL_Color *color);
 void drawGhostPiece(tilemap_t *tilemap, tetromino *piece);
 void drawNextTetromino(tetromino *piece);
