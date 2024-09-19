@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "types.h"
+#include "tiles.h"
 
 #define NUM_TETROMINO_TYPES 7
 #define TETROMINO_WIDTH 4

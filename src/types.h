@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL2/SDL.h>
 #include <stdlib.h>
 
 static SDL_Color COLOR_BG = { 19, 32, 69, 255 };

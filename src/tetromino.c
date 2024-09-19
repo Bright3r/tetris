@@ -1,4 +1,3 @@
-
 #include "tetromino.h"
 
 tetromino *createTetromino(tetromino_type piece_type, int row, int col) {

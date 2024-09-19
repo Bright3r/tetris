@@ -1,5 +1,8 @@
+#pragma once
 
+#include <SDL2/SDL.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct tile_t {
   SDL_Rect *rect; 
@@ -23,6 +26,3 @@ void addTile(tilemap_t *tilemap, tile_t *tile);
 void removeTile(tilemap_t *tilemap, tile_t *tile);
 tile_t *getTile(tilemap_t *tilemap, int row, int col);
 void resizeTileMap(tilemap_t *tilemap, int new_tile_size);
-
-
-

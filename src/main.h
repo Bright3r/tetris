@@ -8,8 +8,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include "types.h"
-#include "tiles.c"
-#include "tetromino.c"
+#include "tiles.h"
+#include "tetromino.h"
 
 #define TITLE "TETRIS"
 #define FRAME_INTERVAL 16.667f

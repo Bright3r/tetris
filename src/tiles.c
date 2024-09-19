@@ -1,4 +1,3 @@
-
 #include "tiles.h"
 
 tile_t *createTile(int row, int col, SDL_Color *color, int tile_size) {  
